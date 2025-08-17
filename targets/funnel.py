@@ -12,7 +12,7 @@ from targets.base_target import Target
 
 
 class Funnel(Target):
-    def __init__(self, dim, log_Z=0., can_sample=True, sample_bounds=None) -> None:
+    def __init__(self, dim, log_Z=0.0, can_sample=True, sample_bounds=None) -> None:
         super().__init__(dim, log_Z, can_sample)
         self.data_ndim = dim
         self.dist_dominant = distrax.Normal(jnp.array([0.0]), jnp.array([3.0]))
@@ -43,7 +43,9 @@ class Funnel(Target):
         dominant_x = self.dist_dominant.sample(seed=key1, sample_shape=sample_shape)  # (B,1)
         x_others = self._dist_other(dominant_x).sample(seed=key2)  # (B, dim-1)
         if self.sample_bounds is not None:
-            return jnp.hstack([dominant_x, x_others]).clip(min=self.sample_bounds[0], max=self.sample_bounds[1])
+            return jnp.hstack([dominant_x, x_others]).clip(
+                min=self.sample_bounds[0], max=self.sample_bounds[1]
+            )
         else:
             return jnp.hstack([dominant_x, x_others])
 
@@ -53,7 +55,9 @@ class Funnel(Target):
         # use covariance matrix, not std
         return distrax.MultivariateNormalFullCovariance(self.mean_other, cov_other)
 
-    def visualise(self, samples: chex.Array = None, axes: List[plt.Axes] = None, show=False, prefix='') -> dict:
+    def visualise(
+        self, samples: chex.Array = None, axes: List[plt.Axes] = None, show=False, prefix=""
+    ) -> dict:
         plt.close()
         fig = plt.figure()
         ax = fig.add_subplot()
@@ -61,10 +65,10 @@ class Funnel(Target):
         grid = jnp.c_[x.ravel(), y.ravel()]
         pdf_values = jax.vmap(jnp.exp)(self.log_prob(grid))
         pdf_values = jnp.reshape(pdf_values, x.shape)
-        plt.contourf(x, y, pdf_values, levels=20, cmap='viridis')
+        plt.contourf(x, y, pdf_values, levels=20, cmap="viridis")
         if samples is not None:
             idx = jax.random.choice(jax.random.PRNGKey(0), samples.shape[0], (300,))
-            ax.scatter(samples[idx, 0], samples[idx, 1], c='r', alpha=0.5, marker='x')
+            ax.scatter(samples[idx, 0], samples[idx, 1], c="r", alpha=0.5, marker="x")
         # plt.xlabel('X')
         # plt.ylabel('Y')
         plt.xticks([])

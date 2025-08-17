@@ -17,9 +17,7 @@ def evolve_underdamped_langevin(
     use_approx_network=False,
 ):
     def U(z, beta):
-        return -1.0 * (
-            beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z)
-        )
+        return -1.0 * (beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z))
 
     def evolve(aux, i):
         x, rho, w, rng_key_gen = aux
@@ -39,17 +37,17 @@ def evolve_underdamped_langevin(
         rho_new = rho_prime_prime - params["eps"] * jax.grad(U)(x_new, beta) / 2.0
 
         # Backwards kernel
-        if alg == 'UHA':  # Uncorrected Hamiltonian Annealing (UHA)
+        if alg == "UHA":  # Uncorrected Hamiltonian Annealing (UHA)
             bk_rho_mean = rho_prime * (1.0 - eta_aux)
 
-        elif alg == 'LDVI':  # Langevin Diffusion Variational Inference (LDVI)
+        elif alg == "LDVI":  # Langevin Diffusion Variational Inference (LDVI)
             input_approx_network = jnp.concatenate([x, rho_prime])
-            bk_rho_mean = (rho_prime * (1.0 - eta_aux)
-                           + 2 * eta_aux * apply_fun_approx_network(params["approx_network"], input_approx_network, i))
+            bk_rho_mean = rho_prime * (1.0 - eta_aux) + 2 * eta_aux * apply_fun_approx_network(
+                params["approx_network"], input_approx_network, i
+            )
 
         else:
-            raise ValueError(f'{alg} is not supported.')
-
+            raise ValueError(f"{alg} is not supported.")
 
         # Evaluate kernels
         fk_log_prob = log_prob_kernel(rho_prime, fk_rho_mean, scale)
@@ -96,7 +94,7 @@ def per_sample_elbo(seed, params_flat, unflatten, params_fixed, log_prob):
         gridref_y = jnp.concatenate([jnp.array([0.0]), gridref_y])
         betas = jnp.interp(params["target_x"], params["gridref_x"], gridref_y)
     else:
-        raise ValueError('Number of temperatures smaller 1.')
+        raise ValueError("Number of temperatures smaller 1.")
 
     rng_key_gen = jax.random.PRNGKey(seed)
 
@@ -137,9 +135,7 @@ def evolve_underdamped_langevin_reverse(
     use_approx_network=False,
 ):
     def U(z, beta):
-        return -1.0 * (
-            beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z)
-        )
+        return -1.0 * (beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z))
 
     def evolve(aux, i):  # todo: currently not working correctly
         x, rho, w, rng_key_gen = aux
@@ -149,16 +145,17 @@ def evolve_underdamped_langevin_reverse(
         scale = jnp.sqrt(2.0 * eta_aux)
 
         # Backwards kernel
-        if alg == 'UHA':  # Uncorrected Hamiltonian Annealing (UHA)
+        if alg == "UHA":  # Uncorrected Hamiltonian Annealing (UHA)
             bk_rho_mean = rho * (1.0 - eta_aux)
 
-        elif alg == 'LDVI':  # Langevin Diffusion Variational Inference (LDVI)
+        elif alg == "LDVI":  # Langevin Diffusion Variational Inference (LDVI)
             input_approx_network = jnp.concatenate([x, rho])
-            bk_rho_mean = (rho * (1.0 - eta_aux)
-                           + 2 * eta_aux * apply_fun_approx_network(params["approx_network"], input_approx_network, i))
+            bk_rho_mean = rho * (1.0 - eta_aux) + 2 * eta_aux * apply_fun_approx_network(
+                params["approx_network"], input_approx_network, i
+            )
 
         else:
-            raise ValueError(f'{alg} is not supported.')
+            raise ValueError(f"{alg} is not supported.")
 
         # Sample Backward kernel
         rng_key, rng_key_gen = jax.random.split(rng_key_gen)
@@ -217,7 +214,7 @@ def per_sample_eubo(seed, params_flat, unflatten, params_fixed, log_prob, target
         gridref_y = jnp.concatenate([jnp.array([0.0]), gridref_y])
         betas = jnp.interp(params["target_x"], params["gridref_x"], gridref_y)
     else:
-        raise ValueError('Number of temperatures smaller 1.')
+        raise ValueError("Number of temperatures smaller 1.")
 
     rng_key_gen = jax.random.PRNGKey(seed)
 

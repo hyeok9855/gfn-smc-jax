@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 """Rewrite of Blackjax HMC kernel for fab preventing re-evaluation of p and q."""
 from typing import Callable, NamedTuple, Tuple, Union, Optional
 
@@ -12,7 +13,11 @@ from blackjax.mcmc.trajectory import hmc_energy
 from blackjax.types import Array, ArrayLikeTree, ArrayTree, PRNGKey
 from blackjax.mcmc.integrators import EuclideanKineticEnergy
 
-from algorithms.fab.sampling.base import get_grad_intermediate_log_prob, get_intermediate_log_prob, Point
+from algorithms.fab.sampling.base import (
+    get_grad_intermediate_log_prob,
+    get_intermediate_log_prob,
+    Point,
+)
 
 
 class IntegratorState(NamedTuple):
@@ -27,20 +32,22 @@ class IntegratorState(NamedTuple):
 
     @property
     def logdensity(self) -> float:
-        return get_intermediate_log_prob(log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha)
+        return get_intermediate_log_prob(
+            log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha
+        )
 
     @property
     def logdensity_grad(self) -> ArrayTree:
-        return get_grad_intermediate_log_prob(grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p,
-                                              beta=self.beta, alpha=self.alpha)
+        return get_grad_intermediate_log_prob(
+            grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p, beta=self.beta, alpha=self.alpha
+        )
 
 
 EuclideanIntegrator = Callable[[IntegratorState, float], IntegratorState]
 
 
 class HMCState(NamedTuple):
-    """State of the HMC algorithm. Save log_q and log_p instead of logdensity and logdensity_grad
-    """
+    """State of the HMC algorithm. Save log_q and log_p instead of logdensity and logdensity_grad"""
 
     position: ArrayTree
     log_q: chex.Array
@@ -52,12 +59,15 @@ class HMCState(NamedTuple):
 
     @property
     def logdensity(self) -> float:
-        return get_intermediate_log_prob(log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha)
+        return get_intermediate_log_prob(
+            log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha
+        )
 
     @property
     def logdensity_grad(self) -> ArrayTree:
-        return get_grad_intermediate_log_prob(grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p,
-                                              beta=self.beta, alpha=self.alpha)
+        return get_grad_intermediate_log_prob(
+            grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p, beta=self.beta, alpha=self.alpha
+        )
 
 
 def velocity_verlet(
@@ -77,8 +87,7 @@ def velocity_verlet(
         position, momentum, logdensity_grad = state.position, state.momentum, state.logdensity_grad
 
         momentum = jax.tree_util.tree_map(
-            lambda momentum, logdensity_grad: momentum
-            + b1 * step_size * logdensity_grad,
+            lambda momentum, logdensity_grad: momentum + b1 * step_size * logdensity_grad,
             momentum,
             logdensity_grad,
         )
@@ -92,14 +101,20 @@ def velocity_verlet(
 
         logdensity_q, logdensity_q_grad = logdensity_q_and_grad_fn(position)
         logdensity_p, logdensity_p_grad = logdensity_p_and_grad_fn(position)
-        state = IntegratorState(position=position, momentum=momentum, log_q=logdensity_q,
-                                log_p=logdensity_p, grad_log_q=logdensity_q_grad, grad_log_p=logdensity_p_grad,
-                                beta=state.beta, alpha=state.alpha)
+        state = IntegratorState(
+            position=position,
+            momentum=momentum,
+            log_q=logdensity_q,
+            log_p=logdensity_p,
+            grad_log_q=logdensity_q_grad,
+            grad_log_p=logdensity_p_grad,
+            beta=state.beta,
+            alpha=state.alpha,
+        )
         logdensity_grad = state.logdensity_grad
 
         momentum = jax.tree_util.tree_map(
-            lambda momentum, logdensity_grad: momentum
-            + b1 * step_size * logdensity_grad,
+            lambda momentum, logdensity_grad: momentum + b1 * step_size * logdensity_grad,
             momentum,
             logdensity_grad,
         )
@@ -120,8 +135,15 @@ class HMCInfo(NamedTuple):
 
 
 def init(point: Point, beta: chex.Array, alpha: float):
-    return HMCState(position=point.x, log_p=point.log_p, log_q=point.log_q, beta=beta,
-                    grad_log_p=point.grad_log_p, grad_log_q=point.grad_log_q, alpha=alpha)
+    return HMCState(
+        position=point.x,
+        log_p=point.log_p,
+        log_q=point.log_q,
+        beta=beta,
+        grad_log_p=point.grad_log_p,
+        grad_log_q=point.grad_log_q,
+        alpha=alpha,
+    )
 
 
 def kernel(
@@ -140,9 +162,7 @@ def kernel(
     ) -> Tuple[HMCState, HMCInfo]:
         """Generate a new sample with the HMC kernel."""
 
-        momentum_generator, kinetic_energy_fn, _ = metrics.gaussian_euclidean(
-            inverse_mass_matrix
-        )
+        momentum_generator, kinetic_energy_fn, _ = metrics.gaussian_euclidean(inverse_mass_matrix)
         symplectic_integrator = integrator(log_q_fn, log_p_fn, kinetic_energy_fn)
         proposal_generator = hmc_proposal(
             symplectic_integrator,
@@ -159,7 +179,7 @@ def kernel(
         integrator_state = IntegratorState(**state._asdict(), momentum=momentum)
         proposal, info = proposal_generator(key_integrator, integrator_state)
         hmc_state_kwargs = proposal._asdict()
-        del(hmc_state_kwargs['momentum'])
+        del hmc_state_kwargs["momentum"]
         proposal = HMCState(**hmc_state_kwargs)
         return proposal, info
 
@@ -180,9 +200,7 @@ def hmc_proposal(
         hmc_energy(kinetic_energy), divergence_threshold
     )
 
-    def generate(
-        rng_key, state: IntegratorState
-    ) -> Tuple[IntegratorState, HMCInfo]:
+    def generate(rng_key, state: IntegratorState) -> Tuple[IntegratorState, HMCInfo]:
         """Generate a new chain state."""
         end_state = build_trajectory(state, step_size, num_integration_steps)
         end_state = flip_momentum(end_state)
@@ -206,8 +224,6 @@ def hmc_proposal(
     return generate
 
 
-def flip_momentum(
-    state: IntegratorState
-) -> IntegratorState:
+def flip_momentum(state: IntegratorState) -> IntegratorState:
     flipped_momentum = jax.tree_util.tree_map(lambda m: -1.0 * m, state.momentum)
     return state._replace(momentum=flipped_momentum)

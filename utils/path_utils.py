@@ -22,7 +22,7 @@ def project_path(*args) -> str:
 
 
 def make_model_dir(alg, exp, seed):
-    base_dir = project_path('models')
+    base_dir = project_path("models")
     if not os.path.exists(base_dir):
         # Create the directory if it doesn't exist
         os.makedirs(base_dir)
@@ -30,10 +30,10 @@ def make_model_dir(alg, exp, seed):
     current_datetime = datetime.now()
 
     # Format the date and time to use in the directory name
-    timestamp = current_datetime.strftime('%Y-%m-%d_%H-%M-%S')
+    timestamp = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
 
     # Combine the base directory, prefix, and timestamp to create the directory path
-    directory_path = os.path.join(base_dir, f'{alg}_{exp}_seed{seed}_{timestamp}')
+    directory_path = os.path.join(base_dir, f"{alg}_{exp}_seed{seed}_{timestamp}")
 
     # Check if the directory already exists
     if not os.path.exists(directory_path):
@@ -42,5 +42,6 @@ def make_model_dir(alg, exp, seed):
 
     return directory_path
 
-if __name__ == '__main__':
-    make_model_dir('mfvi', 'gmm', 0, 0)
+
+if __name__ == "__main__":
+    make_model_dir("mfvi", "gmm", 0, 0)

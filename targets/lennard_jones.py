@@ -60,6 +60,7 @@ from targets.base_target import Target
 # ======================================================================================
 # Copied from file 'se3-augmented-coupling-flows/eacf/utils/graph.py':
 
+
 def get_senders_and_receivers_fully_connected(n_nodes: int) -> Tuple[chex.Array, chex.Array]:
     receivers = []
     senders = []
@@ -73,9 +74,10 @@ def get_senders_and_receivers_fully_connected(n_nodes: int) -> Tuple[chex.Array,
 # ======================================================================================
 # Copied from file 'se3-augmented-coupling-flows/eacf/utils/numerical.py':
 
+
 def safe_norm(x: jnp.ndarray, axis: int = None, keepdims=False) -> jnp.ndarray:
     """nan-safe norm. Copied from mace-jax"""
-    x2 = jnp.sum(x ** 2, axis=axis, keepdims=keepdims)
+    x2 = jnp.sum(x**2, axis=axis, keepdims=keepdims)
     return jnp.where(x2 == 0, 1, x2) ** 0.5
 
 
@@ -92,8 +94,13 @@ class LennardJonesParams:
 
 
 class LennardJones(Target):
-    def __init__(self, dim: int, spatial_dim: int = 3, can_sample=False,
-                 lj_params: Optional[LennardJonesParams] = None):
+    def __init__(
+        self,
+        dim: int,
+        spatial_dim: int = 3,
+        can_sample=False,
+        lj_params: Optional[LennardJonesParams] = None,
+    ):
         """
         - dim: Number of nodes/atoms (Unfortunately the name 'dim' seems to be prescribed by
             how the config-system is set up and might not be changeable to a better name like 'n_nodes')
@@ -132,14 +139,16 @@ class LennardJones(Target):
 
     def log_prob(self, x: chex.Array):
         if len(x.shape) == 1:
-            return - self.energy(x.reshape((self.n_nodes, self.spatial_dim)))
+            return -self.energy(x.reshape((self.n_nodes, self.spatial_dim)))
         elif len(x.shape) == 2:
             batch = x.shape[0]
-            return - jax.vmap(self.energy)(x.reshape((batch, self.n_nodes, self.spatial_dim)))
+            return -jax.vmap(self.energy)(x.reshape((batch, self.n_nodes, self.spatial_dim)))
         else:
             raise Exception
 
-    def visualise(self, samples: chex.Array, axes: List[plt.Axes] = None, show=False, prefix='') -> dict:
+    def visualise(
+        self, samples: chex.Array, axes: List[plt.Axes] = None, show=False, prefix=""
+    ) -> dict:
         plt.close()
 
         if len(samples.shape) == 1:
@@ -161,11 +170,16 @@ class LennardJones(Target):
         project_to_2d = False  # Determine if 3D data is projected to 2D
         scatter_3d = (not project_to_2d) and (self.spatial_dim == 3)
         if scatter_3d:
-            ax2 = fig.add_subplot(122, projection='3d')
+            ax2 = fig.add_subplot(122, projection="3d")
             # Plot 3D projected node samples for each node
             for i in range(self.n_nodes):
-                ax2.scatter(samples[:, i, 0].flatten(), samples[:, i, 1].flatten(), samples[:, i, 2].flatten(),
-                            alpha=0.6, s=10)
+                ax2.scatter(
+                    samples[:, i, 0].flatten(),
+                    samples[:, i, 1].flatten(),
+                    samples[:, i, 2].flatten(),
+                    alpha=0.6,
+                    s=10,
+                )
         else:
             for i in range(self.n_nodes):
                 ax2.scatter(samples[:, i, 0].flatten(), samples[:, i, 1].flatten(), alpha=0.6, s=10)

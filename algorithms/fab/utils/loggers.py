@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 import abc
 from typing import Any, Dict, List, Mapping, Union, Optional
 
@@ -68,9 +69,7 @@ class ListLogger(Logger):
 
         self.iter += 1
         if self.save and (self.iter + 1) % self.save_period == 0:
-            pickle.dump(
-                self.history, open(self.save_path, "wb")
-            )  # overwrite with latest version
+            pickle.dump(self.history, open(self.save_path, "wb"))  # overwrite with latest version
 
     def close(self) -> None:
         if self.save:

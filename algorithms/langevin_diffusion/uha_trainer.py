@@ -13,9 +13,9 @@ from utils.print_util import print_results
 
 
 def uha_trainer(
-        cfg,
-        target,
-        base_dist_params=None,
+    cfg,
+    target,
+    base_dist_params=None,
 ):
     # Unpack cfg
     dim = target.dim
@@ -29,9 +29,13 @@ def uha_trainer(
     target_log_prob = target.log_prob
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
-    params_flat, unflatten, params_fixed = initialize_uha(alg_cfg, dim, base_dist_params=base_dist_params)
+    params_flat, unflatten, params_fixed = initialize_uha(
+        alg_cfg, dim, base_dist_params=base_dist_params
+    )
 
-    evaluate = eval_langevin(per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg)
+    evaluate = eval_langevin(
+        per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg
+    )
 
     elbo_grad = jax.jit(jax.grad(compute_elbo, 1, has_aux=True), static_argnums=(2, 3, 4))
     opt_init, update, get_params = adam(lr)
@@ -54,7 +58,7 @@ def uha_trainer(
         train_losses.append(jnp.mean(elbo).item())
         if jnp.isnan(jnp.mean(elbo)):
             print("Diverged")
-            logger['stats/succ'] = 0
+            logger["stats/succ"] = 0
             return [], True, params_flat, logger
         opt_state = update(i, grad, opt_state, unflatten, trainable)
         timer += time() - iter_time

@@ -12,9 +12,8 @@ from targets.base_target import Target
 
 
 class GMM1D(Target):
-    def __init__(self, dim=1, log_Z=0., can_sample=True, sample_bounds=None) -> None:
+    def __init__(self, dim=1, log_Z=0.0, can_sample=True, sample_bounds=None) -> None:
         super().__init__(dim, log_Z, can_sample)
-
 
         self.num_comp = 4
         logits = jnp.ones(self.num_comp)
@@ -60,8 +59,13 @@ class GMM1D(Target):
         entropy = -jnp.sum(mode_dist * (jnp.log(mode_dist) / jnp.log(self.num_comp)))
         return entropy
 
-    def visualise(self, samples: List[chex.Array] = None, axes: List[plt.Axes] = None,
-                  show=False, suffix: str = ''):
+    def visualise(
+        self,
+        samples: List[chex.Array] = None,
+        axes: List[plt.Axes] = None,
+        show=False,
+        suffix: str = "",
+    ):
         x_range = (-5, 5)
         resolution = 100
 
@@ -71,15 +75,26 @@ class GMM1D(Target):
 
         y_range = (y_grid[0], y_grid[-1])
         # plot
-        fig, ax = plt.subplots(1, 1, figsize=(6, 4),)
+        fig, ax = plt.subplots(
+            1,
+            1,
+            figsize=(6, 4),
+        )
 
         ax.set_xlim(*y_range)
-        ax.set_xlabel('$x$')
+        ax.set_xlabel("$x$")
         # ax.set_title('$\\hat{p}(x_T)$')
-        ax.hist(y_grid[:-1], weights=marg_dens, range=y_range, bins=y_grid, color=dark_gray[0],
-                   orientation='vertical', edgecolor='white', linewidth=0.75)
+        ax.hist(
+            y_grid[:-1],
+            weights=marg_dens,
+            range=y_range,
+            bins=y_grid,
+            color=dark_gray[0],
+            orientation="vertical",
+            edgecolor="white",
+            linewidth=0.75,
+        )
         # Generate x values for the function plot
-
 
         x_values = np.linspace(*x_range, 1000)
         x_values = np.expand_dims(x_values, 1)
@@ -87,22 +102,22 @@ class GMM1D(Target):
         log_probs = jnp.exp(self.log_prob(x_values))
 
         # Plot the function g(x) on the same axes
-        ax.plot(x_values, log_probs, label='$g(x)$', color='black')
+        ax.plot(x_values, log_probs, label="$g(x)$", color="black")
 
         wb = {"figures/vis": wandb.Image(fig)}
         if show:
             plt.show()
 
-        path = './utils/images/'
-        name = suffix + '_diff_traj'
-        plt.savefig(os.path.join(path, name + '.png'), bbox_inches='tight', pad_inches=0.1, dpi=300)
+        path = "./utils/images/"
+        name = suffix + "_diff_traj"
+        plt.savefig(os.path.join(path, name + ".png"), bbox_inches="tight", pad_inches=0.1, dpi=300)
 
         plt.close()
 
         return wb
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gmm = GMM1D()
     # one component, 40 bathc, 60 time
     samples = gmm.sample(jax.random.PRNGKey(0), (10000,))

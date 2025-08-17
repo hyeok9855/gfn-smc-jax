@@ -13,14 +13,19 @@ import tensorflow_datasets as tfds
 import wandb
 from absl import app, flags
 from ml_collections import config_flags
-from utils.nice_trainer.nice_utils import flatten_nested_dict, make_grid, setup_training, update_config_dict
+from utils.nice_trainer.nice_utils import (
+    flatten_nested_dict,
+    make_grid,
+    setup_training,
+    update_config_dict,
+)
 
 config_flags.DEFINE_config_file("config", ("nice_config.py"), "Run configuration.")
 FLAGS = flags.FLAGS
 
 
 def dequantize(x, y, n_bits=3):
-    n_bins = 2.0 ** n_bits
+    n_bins = 2.0**n_bits
     x = tf.cast(x, tf.float32)
     x = tf.floor(x / 2 ** (8 - n_bits))
     x = x / n_bins
@@ -41,20 +46,18 @@ def logit(x, y, alpha=1e-6):
     return x, y
 
 
-def load_dataset(split: str, batch_size: int, im_size: int, alpha: float, n_bits: int, dataset: str):
+def load_dataset(
+    split: str, batch_size: int, im_size: int, alpha: float, n_bits: int, dataset: str
+):
     """Loads the dataset as a generator of batches."""
     ds, ds_info = tfds.load(dataset, split=split, as_supervised=True, with_info=True)
     ds = ds.cache()
-    ds = ds.map(
-        lambda x, y: resize(x, y, im_size=im_size), num_parallel_calls=tf.data.AUTOTUNE
-    )
+    ds = ds.map(lambda x, y: resize(x, y, im_size=im_size), num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.map(
         lambda x, y: dequantize(x, y, n_bits=n_bits),
         num_parallel_calls=tf.data.AUTOTUNE,
     )
-    ds = ds.map(
-        lambda x, y: logit(x, y, alpha=alpha), num_parallel_calls=tf.data.AUTOTUNE
-    )
+    ds = ds.map(lambda x, y: logit(x, y, alpha=alpha), num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.shuffle(ds_info.splits["train"].num_examples)
     ds = ds.batch(batch_size, drop_remainder=True)
     ds = ds.prefetch(tf.data.AUTOTUNE)
@@ -100,8 +103,10 @@ def main(config):
 
         key_gen = jax.random.PRNGKey(0)
         key, key_gen = jax.random.split(key_gen)
-        flow = NICE(dim=config.im_size ** 2, h_dim=config.hidden_dim)
-        params = flow.init(key, jnp.zeros((config.batch_size, config.im_size ** 2)), jnp.array(config.batch_size))
+        flow = NICE(dim=config.im_size**2, h_dim=config.hidden_dim)
+        params = flow.init(
+            key, jnp.zeros((config.batch_size, config.im_size**2)), jnp.array(config.batch_size)
+        )
 
         # load data
         ds = load_dataset(

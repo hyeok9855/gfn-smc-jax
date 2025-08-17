@@ -1,4 +1,5 @@
-"""Code builds on https://github.com/google-deepmind/annealed_flow_transport """
+"""Code builds on https://github.com/google-deepmind/annealed_flow_transport"""
+
 from typing import Tuple
 
 import algorithms.common.types as tp
@@ -14,13 +15,9 @@ class NormalDistribution(object):
     def __init__(self, config):
         self._config = config
 
-    def __call__(self,
-                 key: RandomKey,
-                 num_samples: int,
-                 sample_shape: Tuple[int]) -> Array:
+    def __call__(self, key: RandomKey, num_samples: int, sample_shape: Tuple[int]) -> Array:
         batched_sample_shape = (num_samples,) + sample_shape
-        return jax.random.normal(key,
-                                 shape=batched_sample_shape)
+        return jax.random.normal(key, shape=batched_sample_shape)
 
 
 class MultivariateNormalDistribution(object):
@@ -29,7 +26,6 @@ class MultivariateNormalDistribution(object):
     def __init__(self, config):
         self._config = config
 
-    def __call__(self, key: RandomKey, num_samples: int,
-                 sample_shape: Tuple[int]) -> Array:
+    def __call__(self, key: RandomKey, num_samples: int, sample_shape: Tuple[int]) -> Array:
         batched_sample_shape = (num_samples,) + sample_shape
         return jax.random.normal(key, shape=batched_sample_shape)

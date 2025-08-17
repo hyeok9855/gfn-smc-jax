@@ -19,7 +19,7 @@ from utils.path_utils import project_path
 
 
 def load_model(model_path, cfg):
-    return pickle.load(open(project_path(f'models/{model_path}.pkl'), 'rb'))
+    return pickle.load(open(project_path(f"models/{model_path}.pkl"), "rb"))
 
 
 def craft_trainer(cfg, target):
@@ -31,14 +31,19 @@ def craft_trainer(cfg, target):
 
     key = jax.random.PRNGKey(cfg.seed)
 
-    initial_density = distrax.MultivariateNormalDiag(jnp.ones(dim) * alg_cfg.init_mean,
-                                                     jnp.ones(dim) * alg_cfg.init_std)
+    initial_density = distrax.MultivariateNormalDiag(
+        jnp.ones(dim) * alg_cfg.init_mean, jnp.ones(dim) * alg_cfg.init_std
+    )
     log_density_initial = initial_density.log_prob
     initial_sampler = initial_density.sample
 
     num_temps = alg_cfg.num_temps
-    density_by_step = flow_transport.GeometricAnnealingSchedule(log_density_initial, final_log_density, num_temps)
-    markov_kernel_by_step = markov_kernel.MarkovTransitionKernel(mcmc_cfg, density_by_step, num_temps)
+    density_by_step = flow_transport.GeometricAnnealingSchedule(
+        log_density_initial, final_log_density, num_temps
+    )
+    markov_kernel_by_step = markov_kernel.MarkovTransitionKernel(
+        mcmc_cfg, density_by_step, num_temps
+    )
 
     def flow_func(x):
         flow = getattr(flows, flow_cfg.flow_type)(flow_cfg)
@@ -49,7 +54,7 @@ def craft_trainer(cfg, target):
         return flow.inverse(x)
 
     flow_cfg.num_elem = dim
-    flow_cfg.sample_shape = (dim, )
+    flow_cfg.sample_shape = (dim,)
 
     flow_forward_fn = hk.without_apply_rng(hk.transform(flow_func))
     flow_inverse_fn = hk.without_apply_rng(hk.transform(inv_flow_func))
@@ -72,6 +77,7 @@ def craft_trainer(cfg, target):
         markov_kernel_by_step=markov_kernel_by_step,
         initial_sampler=initial_sampler,
         key=key,
-        cfg=cfg)
+        cfg=cfg,
+    )
 
     return results

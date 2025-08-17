@@ -6,6 +6,7 @@ import distrax
 
 class NICE(nn.Module):
     """Implements a NICE flow."""
+
     dim: int
     h_dim: int
     n_steps: int = 4
@@ -29,7 +30,7 @@ class NICE(nn.Module):
             parts.append(shuff)
         self.parts = nn.Sequential(parts)
 
-        self._logscale = self.param('logscale', lambda rng, shape: jnp.zeros(shape))
+        self._logscale = self.param("logscale", lambda rng, shape: jnp.zeros(shape))
 
     def __call__(self):
         return self.logpx, lambda x: self.reverse(self.forward(x)), self.sample

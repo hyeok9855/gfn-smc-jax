@@ -3,6 +3,7 @@ from typing import List
 import jax.numpy as jnp
 import jax
 import chex
+
 # import matplotlib
 #
 # matplotlib.use('TkAgg')
@@ -32,7 +33,7 @@ class Energy:
     def energy(self, x, temperature=None):
         assert x.shape[-1] == self._dim, "`x` does not match `dim`"
         if temperature is None:
-            temperature = 1.
+            temperature = 1.0
         return self._energy(x) / temperature
 
     def force(self, x, temperature=None):
@@ -41,7 +42,7 @@ class Energy:
 
 
 class DoubleWellEnergy(Energy):
-    def __init__(self, a: float = -0.5, b: float = -6.0, c: float = 1.):
+    def __init__(self, a: float = -0.5, b: float = -6.0, c: float = 1.0):
         dim = 2
         super().__init__(dim)
         self._a = a
@@ -51,8 +52,8 @@ class DoubleWellEnergy(Energy):
     def _energy(self, x):
         d = x[:, [0]]
         v = x[:, 1:]
-        e1 = self._a * d + self._b * d ** 2 + self._c * d ** 4
-        e2 = jnp.sum(0.5 * v ** 2, axis=-1, keepdims=True)
+        e1 = self._a * d + self._b * d**2 + self._c * d**4
+        e2 = jnp.sum(0.5 * v**2, axis=-1, keepdims=True)
         return e1 + e2
 
     def log_prob(self, x):
@@ -68,7 +69,15 @@ class DoubleWellEnergy(Energy):
 
 
 class ManyWellEnergy(Target):
-    def __init__(self, a: float = -0.5, b: float = -6.0, c: float = 1., dim=32, can_sample=False, sample_bounds=None) -> None:
+    def __init__(
+        self,
+        a: float = -0.5,
+        b: float = -6.0,
+        c: float = 1.0,
+        dim=32,
+        can_sample=False,
+        sample_bounds=None,
+    ) -> None:
         assert dim % 2 == 0
         self.n_wells = dim // 2
         self.double_well_energy = DoubleWellEnergy(a, b, c)
@@ -79,10 +88,11 @@ class ManyWellEnergy(Target):
         self.centre = 1.7
         self.max_dim_for_all_modes = 40  # otherwise we get memory issues on huge test set
         if self.dim < self.max_dim_for_all_modes:
-            dim_1_vals_grid = jnp.meshgrid(*[jnp.array([-self.centre, self.centre]) for _ in
-                                             range(self.n_wells)])
+            dim_1_vals_grid = jnp.meshgrid(
+                *[jnp.array([-self.centre, self.centre]) for _ in range(self.n_wells)]
+            )
             dim_1_vals = jnp.stack([dim.flatten() for dim in dim_1_vals_grid], axis=-1)
-            n_modes = 2 ** self.n_wells
+            n_modes = 2**self.n_wells
             assert n_modes == dim_1_vals.shape[0]
             test_set = jnp.zeros((n_modes, dim))
             test_set = test_set.at[:, jnp.arange(dim) % 2 == 0].set(dim_1_vals)
@@ -92,7 +102,7 @@ class ManyWellEnergy(Target):
 
         self.shallow_well_bounds = [-1.75, -1.65]
         self.deep_well_bounds = [1.7, 1.8]
-        self._plot_bound = 3.
+        self._plot_bound = 3.0
 
     def log_prob(self, x):
         batched = x.ndim == 2
@@ -100,8 +110,17 @@ class ManyWellEnergy(Target):
         if not batched:
             x = x[None,]
 
-        log_probs = jnp.sum(jnp.stack([self.double_well_energy.log_prob(x[..., i * 2:i * 2 + 2]) for
-                                       i in range(self.n_wells)], axis=-1), axis=-1, keepdims=True).reshape((-1,))
+        log_probs = jnp.sum(
+            jnp.stack(
+                [
+                    self.double_well_energy.log_prob(x[..., i * 2 : i * 2 + 2])
+                    for i in range(self.n_wells)
+                ],
+                axis=-1,
+            ),
+            axis=-1,
+            keepdims=True,
+        ).reshape((-1,))
 
         if not batched:
             log_probs = jnp.squeeze(log_probs, axis=0)
@@ -111,7 +130,7 @@ class ManyWellEnergy(Target):
         """Marginal 2D pdf - useful for plotting."""
         return self.double_well_energy.log_prob(x)
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         """Visualise samples from the model."""
         plotting_bounds = (-3, 3)
         grid_width_n_points = 100
@@ -128,11 +147,13 @@ class ManyWellEnergy(Target):
 
                 xx, yy = jnp.meshgrid(
                     jnp.linspace(plotting_bounds[0], plotting_bounds[1], grid_width_n_points),
-                    jnp.linspace(plotting_bounds[0], plotting_bounds[1], grid_width_n_points)
+                    jnp.linspace(plotting_bounds[0], plotting_bounds[1], grid_width_n_points),
                 )
                 x_points = jnp.column_stack([xx.ravel(), yy.ravel()])
                 log_probs = _log_prob_marginal_pair(x_points, i, j + 2)
-                log_probs = jnp.clip(log_probs, -1000, a_max=None).reshape((grid_width_n_points, grid_width_n_points))
+                log_probs = jnp.clip(log_probs, -1000, a_max=None).reshape(
+                    (grid_width_n_points, grid_width_n_points)
+                )
                 axs[i, j].contour(xx, yy, log_probs, levels=20)
 
                 # plot samples
@@ -151,12 +172,11 @@ class ManyWellEnergy(Target):
 
         return wb
 
-
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         return None
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     mw = ManyWellEnergy()
     mw.visualise(samples=mw.sample(jax.random.PRNGKey(0), (1,)))
 

@@ -13,8 +13,9 @@ class StateTimeNetwork(nn.Module):
 
     def setup(self):
         self.state_time_coder = TimeEncoder(self.num_hid)
-        self.state_time_net = StateTimeEncoder(num_layers=self.num_layers, num_hid=self.num_hid,
-                                               name='state_time_net', parent=self)
+        self.state_time_net = StateTimeEncoder(
+            num_layers=self.num_layers, num_hid=self.num_hid, name="state_time_net", parent=self
+        )
 
     def __call__(self, input_array, time_array, lgv_term):
         t_embed = self.state_time_coder(time_array)

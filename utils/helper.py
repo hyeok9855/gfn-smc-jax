@@ -3,7 +3,7 @@ import jax
 import jax.numpy as jnp
 
 
-def flatten_dict(d, parent_key='', sep='_'):
+def flatten_dict(d, parent_key="", sep="_"):
     """
     Flatten a nested dictionary into a flat dictionary.
 
@@ -27,11 +27,11 @@ def flatten_dict(d, parent_key='', sep='_'):
 
 def reset_device_memory(delete_objs=True):
     """Free all tracked DeviceArray memory and delete objects.
-  Args:
-    delete_objs: bool: whether to delete all live DeviceValues or just free.
-  Returns:
-    number of DeviceArrays that were manually freed.
-  """
+    Args:
+      delete_objs: bool: whether to delete all live DeviceValues or just free.
+    Returns:
+      number of DeviceArrays that were manually freed.
+    """
     dvals = (x for x in gc.get_objects() if isinstance(x, jax.xla.DeviceValue))
     n_deleted = 0
     for dv in dvals:
@@ -48,7 +48,8 @@ def reset_device_memory(delete_objs=True):
     gc.collect()
 
     backend = jax.lib.xla_bridge.get_backend()
-    for buf in backend.live_buffers(): buf.delete()
+    for buf in backend.live_buffers():
+        buf.delete()
     return n_deleted
 
 
@@ -73,7 +74,7 @@ def stable_mean(x):
     return mean_value
 
 
-def replace_invalid(x, replacement=0.):
+def replace_invalid(x, replacement=0.0):
     # Create a mask where `True` indicates non-NaN values
     nan_check = ~jnp.isnan(x)
     inf_check = ~jnp.isinf(x)
@@ -91,6 +92,7 @@ def replace_invalid(x, replacement=0.):
 def inverse_softplus(x):
     return jnp.log(jnp.exp(x) - 1)
 
+
 def flattened_traversal(fn):
     def mask(data):
         flat = traverse_util.flatten_dict(data)
@@ -99,7 +101,7 @@ def flattened_traversal(fn):
     return mask
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_std = 10
     a = inverse_softplus(10)
     print(jax.nn.softplus(a))

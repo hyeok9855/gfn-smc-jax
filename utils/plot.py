@@ -10,11 +10,9 @@ import pandas as pd
 import wandb
 
 
-def plot_gaussian_contours_2D(std,
-                              samples,
-                              ax: Optional[plt.Axes] = None,
-                              levels: int = 20,
-                              show=False):
+def plot_gaussian_contours_2D(
+    std, samples, ax: Optional[plt.Axes] = None, levels: int = 20, show=False
+):
     """Plot the contours of a 2D log prob function."""
     n_points = 100
     dim = samples.shape[1]
@@ -23,7 +21,9 @@ def plot_gaussian_contours_2D(std,
     x_points_dim1 = np.linspace(-4 * std, 4 * std, n_points)
     x_points_dim2 = np.linspace(-4 * std, 4 * std, n_points)
     x_points = np.array(list(itertools.product(x_points_dim1, x_points_dim2)))
-    log_prob_func = distrax.MultivariateNormalDiag(loc=jnp.zeros(2), scale_diag=jnp.ones(2) * std).log_prob
+    log_prob_func = distrax.MultivariateNormalDiag(
+        loc=jnp.zeros(2), scale_diag=jnp.ones(2) * std
+    ).log_prob
     log_probs = log_prob_func(x_points)
     log_probs = jnp.clip(log_probs, a_min=-1000, a_max=None)
     x1 = x_points[:, 0].reshape(n_points, n_points)
@@ -31,7 +31,7 @@ def plot_gaussian_contours_2D(std,
     z = log_probs.reshape(n_points, n_points)
     ax.contourf(x1, x2, jnp.exp(z), levels=levels)
 
-    ax.scatter(samples[:, 0], samples[:, 1], c='r', alpha=0.6, marker='x')
+    ax.scatter(samples[:, 0], samples[:, 1], c="r", alpha=0.6, marker="x")
 
     try:
         wandb.log({"images/backward": wandb.Image(plt)})

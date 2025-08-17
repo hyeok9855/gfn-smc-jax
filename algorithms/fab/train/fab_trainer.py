@@ -3,6 +3,7 @@ Code for Flow Annealed Importance Sampling Bootstrap (FAB).
 For further details see https://arxiv.org/abs/2208.01893.
 Code builds on https://github.com/lollcat/fab-jax.
 """
+
 import pickle
 import jax
 import wandb
@@ -16,7 +17,7 @@ from utils.print_util import print_results
 
 
 def save_model(model_path, state, step):
-    with open(project_path(f'{model_path}/{step}.pkl'), 'wb') as f:
+    with open(project_path(f"{model_path}/{step}.pkl"), "wb") as f:
         pickle.dump(state, f)
 
 
@@ -39,9 +40,14 @@ def fab_trainer(cfg, target):
     timer = 0
 
     ais_nfe = 2 * config.batch_size * (alg_cfg.smc.n_intermediate_distributions - 1)
-    mcmc_nfe = config.batch_size * (alg_cfg.smc.n_intermediate_distributions - 1) * (
-            alg_cfg.smc.hmc.n_outer_steps * alg_cfg.smc.hmc.n_inner_steps +
-            alg_cfg.smc.metropolis.n_outer_steps)
+    mcmc_nfe = (
+        config.batch_size
+        * (alg_cfg.smc.n_intermediate_distributions - 1)
+        * (
+            alg_cfg.smc.hmc.n_outer_steps * alg_cfg.smc.hmc.n_inner_steps
+            + alg_cfg.smc.metropolis.n_outer_steps
+        )
+    )
     smc_nfe = ais_nfe + mcmc_nfe
 
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))

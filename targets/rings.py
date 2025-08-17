@@ -24,9 +24,11 @@ class ConcentricRings(Target):
         u = jax.random.uniform(subkey, minval=0, maxval=1, shape=sample_shape)
 
         rs = jnp.linspace(0, self.c1, 1000)
-        r = jnp.where(u <= ((self.A - 1) / self.A),
-                      rs[jnp.argmin(jnp.abs(jnp.sin(rs[:, None]) + 1.001 * rs[:, None] - self.A * u), 0)],
-                      self.c1 - jnp.log(self.A * (1 - u))).reshape(-1, 1)
+        r = jnp.where(
+            u <= ((self.A - 1) / self.A),
+            rs[jnp.argmin(jnp.abs(jnp.sin(rs[:, None]) + 1.001 * rs[:, None] - self.A * u), 0)],
+            self.c1 - jnp.log(self.A * (1 - u)),
+        ).reshape(-1, 1)
 
         return r * dir
 
@@ -35,7 +37,7 @@ class ConcentricRings(Target):
         lp = jnp.log(jnp.where(r <= self.c1, jnp.cos(r) + 1.001, jnp.exp((self.c1 - r))))
         return jnp.where(lp == -jnp.inf, -100, lp)
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         if self.dim == 2:
             fig = plt.figure()
             ax = fig.add_subplot()
@@ -43,9 +45,9 @@ class ConcentricRings(Target):
             grid = jnp.c_[x.ravel(), y.ravel()]
             pdf_values = jax.vmap(jnp.exp)(self.log_prob(grid))
             pdf_values = jnp.reshape(pdf_values, x.shape)
-            ax.contourf(x, y, pdf_values, levels=20, cmap='viridis')
+            ax.contourf(x, y, pdf_values, levels=20, cmap="viridis")
             if samples is not None:
-                plt.scatter(samples[:, 0], samples[:, 1], c='r', alpha=0.5, marker='x')
+                plt.scatter(samples[:, 0], samples[:, 1], c="r", alpha=0.5, marker="x")
             # plt.xlabel('X')
             # plt.ylabel('Y')
             # plt.colorbar()

@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 from typing import Tuple, Callable
 
 import distrax
@@ -10,13 +11,14 @@ import tensorflow_probability.substrates.jax as tfp
 
 from algorithms.fab.utils.jax_util import inverse_softplus
 
+
 class UnconditionalAffine(distrax.Bijector):
     """Unconditioned Affine transform."""
-    def __init__(self, get_params: Callable[[], Tuple[chex.Array, chex.Array]],
-                 restrict_scaling: bool = True) -> None:
-        super().__init__(event_ndims_in = 1,
-               is_constant_jacobian = True,
-               is_constant_log_det = True)
+
+    def __init__(
+        self, get_params: Callable[[], Tuple[chex.Array, chex.Array]], restrict_scaling: bool = True
+    ) -> None:
+        super().__init__(event_ndims_in=1, is_constant_jacobian=True, is_constant_log_det=True)
 
         self._get_params = get_params
         self._restrict_scaling = restrict_scaling
@@ -25,11 +27,11 @@ class UnconditionalAffine(distrax.Bijector):
         scale_logit, shift = self._get_params()
         if self._restrict_scaling:
             # Prevents any individual act norm layer doing a huge amount of scaling.
-            scale_logit_bijector = tfp.bijectors.Sigmoid(low=0.02, high=50.)
-            scale_logit_init = scale_logit_bijector.inverse(1.)
+            scale_logit_bijector = tfp.bijectors.Sigmoid(low=0.02, high=50.0)
+            scale_logit_init = scale_logit_bijector.inverse(1.0)
             scale = scale_logit_bijector(scale_logit + scale_logit_init)
         else:
-            scale = jax.nn.softplus(scale_logit + inverse_softplus(1.))
+            scale = jax.nn.softplus(scale_logit + inverse_softplus(1.0))
         shift = shift
         return scale, shift
 

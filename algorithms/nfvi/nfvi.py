@@ -27,13 +27,15 @@ ParticleState = tp.ParticleState
 assert_trees_all_equal_shapes = chex.assert_trees_all_equal_shapes
 
 
-def vi_free_energy(flow_params: FlowParams,
-                   key: RandomKey,
-                   initial_sampler: InitialSampler,
-                   initial_density: LogDensityNoStep,
-                   final_density: LogDensityNoStep,
-                   flow_apply: FlowApply,
-                   cfg):
+def vi_free_energy(
+    flow_params: FlowParams,
+    key: RandomKey,
+    initial_sampler: InitialSampler,
+    initial_density: LogDensityNoStep,
+    final_density: LogDensityNoStep,
+    flow_apply: FlowApply,
+    cfg,
+):
     """The variational free energy used in VI with normalizing flows."""
     samples = initial_sampler(seed=key, sample_shape=(cfg.algorithm.batch_size,))
     transformed_samples, log_det_jacs = flow_apply(flow_params, samples)
@@ -48,16 +50,17 @@ def vi_free_energy(flow_params: FlowParams,
     return free_energy
 
 
-def outer_loop_vi(initial_sampler: InitialSampler,
-                  opt_update: UpdateFn,
-                  opt_init_state: OptState,
-                  flow_init_params: FlowParams,
-                  flow_apply: FlowApply,
-                  flow_inverse_apply: FlowApply,
-                  initial_log_density: LogDensityNoStep,
-                  target: Target,
-                  cfg,
-                  ):
+def outer_loop_vi(
+    initial_sampler: InitialSampler,
+    opt_update: UpdateFn,
+    opt_init_state: OptState,
+    flow_init_params: FlowParams,
+    flow_apply: FlowApply,
+    flow_inverse_apply: FlowApply,
+    initial_log_density: LogDensityNoStep,
+    target: Target,
+    cfg,
+):
 
     def eval_nfvi(key: RandomKey):
         """Estimate log normalizing constant using naive importance sampling."""
@@ -84,12 +87,14 @@ def outer_loop_vi(initial_sampler: InitialSampler,
     alg_cfg = cfg.algorithm
     eval_freq = max(alg_cfg.iters // cfg.n_evals, 1)
 
-    vi_free_energy_short = functools.partial(vi_free_energy,
-                                             initial_sampler=initial_sampler,
-                                             initial_density=initial_log_density,
-                                             final_density=target.log_prob,
-                                             flow_apply=flow_apply,
-                                             cfg=cfg)
+    vi_free_energy_short = functools.partial(
+        vi_free_energy,
+        initial_sampler=initial_sampler,
+        initial_density=initial_log_density,
+        final_density=target.log_prob,
+        flow_apply=flow_apply,
+        cfg=cfg,
+    )
 
     free_energy_and_grad = jax.jit(jax.value_and_grad(vi_free_energy_short))
 
@@ -99,12 +104,9 @@ def outer_loop_vi(initial_sampler: InitialSampler,
     @jax.jit
     def nfvi_update(curr_key, curr_flow_params, curr_opt_state):
         subkey, curr_key = jax.random.split(curr_key)
-        new_free_energy, flow_grads = free_energy_and_grad(curr_flow_params,
-                                                           subkey)
-        updates, new_opt_state = opt_update(flow_grads,
-                                            curr_opt_state)
-        new_flow_params = optax.apply_updates(curr_flow_params,
-                                              updates)
+        new_free_energy, flow_grads = free_energy_and_grad(curr_flow_params, subkey)
+        updates, new_opt_state = opt_update(flow_grads, curr_opt_state)
+        new_flow_params = optax.apply_updates(curr_flow_params, updates)
         return curr_key, new_flow_params, new_free_energy, new_opt_state
 
     key = jax.random.PRNGKey(cfg.seed)
@@ -117,7 +119,7 @@ def outer_loop_vi(initial_sampler: InitialSampler,
     timer = 0
 
     for step in range(alg_cfg.iters):
-        with jax.profiler.StepTraceAnnotation('train', step_num=step):
+        with jax.profiler.StepTraceAnnotation("train", step_num=step):
             iter_time = time()
             key, flow_params, curr_free_energy, opt_state = nfvi_update(key, flow_params, opt_state)
             timer += time() - iter_time
@@ -133,4 +135,3 @@ def outer_loop_vi(initial_sampler: InitialSampler,
 
                 if cfg.use_wandb:
                     wandb.log(logger)
-

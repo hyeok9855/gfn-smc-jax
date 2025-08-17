@@ -9,14 +9,14 @@ Code for computing the Maximum-Mean-Discrepancy (MMD) based on https://github.co
 
 @partial(jit)
 def mmd_median(
-        X,
-        Y,
+    X,
+    Y,
 ):
     # Assertions
     m = X.shape[0]
     n = Y.shape[0]
     assert n >= 2 and m >= 2
-    kernel = 'gaussian'
+    kernel = "gaussian"
     l = "l2"
     # Compute kernel matrix
     Z = jnp.concatenate((X, Y))
@@ -49,40 +49,26 @@ def kernel_matrix(pairwise_matrix, l, kernel, bandwidth, rq_kernel_exponent=0.5)
     """
     d = pairwise_matrix / bandwidth
     if kernel == "gaussian" and l == "l2":
-        return jnp.exp(-(d ** 2) / 2)
+        return jnp.exp(-(d**2) / 2)
     elif kernel == "laplace" and l == "l1":
         return jnp.exp(-d * jnp.sqrt(2))
     elif kernel == "rq" and l == "l2":
-        return (1 + d ** 2 / (2 * rq_kernel_exponent)) ** (-rq_kernel_exponent)
+        return (1 + d**2 / (2 * rq_kernel_exponent)) ** (-rq_kernel_exponent)
     elif kernel == "imq" and l == "l2":
-        return (1 + d ** 2) ** (-0.5)
-    elif (kernel == "matern_0.5_l1" and l == "l1") or (
-            kernel == "matern_0.5_l2" and l == "l2"
-    ):
+        return (1 + d**2) ** (-0.5)
+    elif (kernel == "matern_0.5_l1" and l == "l1") or (kernel == "matern_0.5_l2" and l == "l2"):
         return jnp.exp(-d)
-    elif (kernel == "matern_1.5_l1" and l == "l1") or (
-            kernel == "matern_1.5_l2" and l == "l2"
-    ):
+    elif (kernel == "matern_1.5_l1" and l == "l1") or (kernel == "matern_1.5_l2" and l == "l2"):
         return (1 + jnp.sqrt(3) * d) * jnp.exp(-jnp.sqrt(3) * d)
-    elif (kernel == "matern_2.5_l1" and l == "l1") or (
-            kernel == "matern_2.5_l2" and l == "l2"
-    ):
-        return (1 + jnp.sqrt(5) * d + 5 / 3 * d ** 2) * jnp.exp(-jnp.sqrt(5) * d)
-    elif (kernel == "matern_3.5_l1" and l == "l1") or (
-            kernel == "matern_3.5_l2" and l == "l2"
-    ):
+    elif (kernel == "matern_2.5_l1" and l == "l1") or (kernel == "matern_2.5_l2" and l == "l2"):
+        return (1 + jnp.sqrt(5) * d + 5 / 3 * d**2) * jnp.exp(-jnp.sqrt(5) * d)
+    elif (kernel == "matern_3.5_l1" and l == "l1") or (kernel == "matern_3.5_l2" and l == "l2"):
         return (
-                1 + jnp.sqrt(7) * d + 2 * 7 / 5 * d ** 2 + 7 * jnp.sqrt(7) / 3 / 5 * d ** 3
+            1 + jnp.sqrt(7) * d + 2 * 7 / 5 * d**2 + 7 * jnp.sqrt(7) / 3 / 5 * d**3
         ) * jnp.exp(-jnp.sqrt(7) * d)
-    elif (kernel == "matern_4.5_l1" and l == "l1") or (
-            kernel == "matern_4.5_l2" and l == "l2"
-    ):
+    elif (kernel == "matern_4.5_l1" and l == "l1") or (kernel == "matern_4.5_l2" and l == "l2"):
         return (
-                1
-                + 3 * d
-                + 3 * (6 ** 2) / 28 * d ** 2
-                + (6 ** 3) / 84 * d ** 3
-                + (6 ** 4) / 1680 * d ** 4
+            1 + 3 * d + 3 * (6**2) / 28 * d**2 + (6**3) / 84 * d**3 + (6**4) / 1680 * d**4
         ) * jnp.exp(-3 * d)
     else:
         raise ValueError('The values of "l" and "kernel" are not valid.')

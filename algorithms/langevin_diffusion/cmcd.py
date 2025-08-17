@@ -6,21 +6,19 @@ from algorithms.langevin_diffusion.ld_utils import sample_kernel, log_prob_kerne
 
 
 def evolve_overdamped_cmcd(
-        z,
-        betas,
-        params,
-        rng_key_gen,
-        params_fixed,
-        log_prob_model,
-        sample_kernel,
-        log_prob_kernel,
-        grad_clipping=False,
-        eps_schedule='None'
+    z,
+    betas,
+    params,
+    rng_key_gen,
+    params_fixed,
+    log_prob_model,
+    sample_kernel,
+    log_prob_kernel,
+    grad_clipping=False,
+    eps_schedule="None",
 ):
     def U(z, beta):
-        return -1.0 * (
-                beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z)
-        )
+        return -1.0 * (beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z))
 
     def gradU(z, beta, clip=1e3):
         p = lambda z: bd.log_prob(params["bd"], z)
@@ -70,7 +68,11 @@ def evolve_overdamped_cmcd(
         # ub = jax.grad(U)(z_new, beta)
         ub = gradU(z_new, beta) if stable else jax.grad(U)(z_new, beta)
 
-        bk_mean = (z_new - eps * ub + eps * apply_fun_approx_network(params["approx_network"], z_new, i + 1))
+        bk_mean = (
+            z_new
+            - eps * ub
+            + eps * apply_fun_approx_network(params["approx_network"], z_new, i + 1)
+        )
 
         # Evaluate kernels
         fk_log_prob = log_prob_kernel(z_new, fk_mean, scale)
@@ -91,9 +93,16 @@ def evolve_overdamped_cmcd(
     return z, w, None
 
 
-def per_sample_elbo(seed, params_flat, unflatten, params_fixed, log_prob, stop_grad=False,
-                    grad_clipping=False,
-                    eps_schedule="none", ):
+def per_sample_elbo(
+    seed,
+    params_flat,
+    unflatten,
+    params_fixed,
+    log_prob,
+    stop_grad=False,
+    grad_clipping=False,
+    eps_schedule="none",
+):
     params_train, params_notrain = unflatten(params_flat)
     params_notrain = jax.lax.stop_gradient(params_notrain)
     params = {**params_train, **params_notrain}  # Gets all parameters in single place
@@ -104,7 +113,7 @@ def per_sample_elbo(seed, params_flat, unflatten, params_fixed, log_prob, stop_g
         gridref_y = jnp.concatenate([jnp.array([0.0]), gridref_y])
         betas = jnp.interp(params["target_x"], params["gridref_x"], gridref_y)
     else:
-        raise ValueError('Number of temperatures smaller 1.')
+        raise ValueError("Number of temperatures smaller 1.")
 
     rng_key_gen = jax.random.PRNGKey(seed)
 
@@ -118,7 +127,16 @@ def per_sample_elbo(seed, params_flat, unflatten, params_fixed, log_prob, stop_g
     if num_temps >= 1:
         rng_key, rng_key_gen = jax.random.split(rng_key_gen)
         x, w_t, _ = evolve_overdamped_cmcd(
-            x, betas, params, rng_key, params_fixed, log_prob, sample_kernel, log_prob_kernel, grad_clipping, eps_schedule
+            x,
+            betas,
+            params,
+            rng_key,
+            params_fixed,
+            log_prob,
+            sample_kernel,
+            log_prob_kernel,
+            grad_clipping,
+            eps_schedule,
         )
 
         w += w_t
@@ -128,40 +146,50 @@ def per_sample_elbo(seed, params_flat, unflatten, params_fixed, log_prob, stop_g
     return -1.0 * w, (x, _)
 
 
-def compute_elbo(seeds, params_flat, unflatten, params_fixed, log_prob,
-                 grad_clipping=False,
-                 eps_schedule="none", ):
-    elbos, (x, _) = jax.vmap(per_sample_elbo, in_axes=(0, None, None, None, None, None, None, None))(
-        seeds, params_flat, unflatten, params_fixed, log_prob, False, grad_clipping, eps_schedule
-    )
+def compute_elbo(
+    seeds,
+    params_flat,
+    unflatten,
+    params_fixed,
+    log_prob,
+    grad_clipping=False,
+    eps_schedule="none",
+):
+    elbos, (x, _) = jax.vmap(
+        per_sample_elbo, in_axes=(0, None, None, None, None, None, None, None)
+    )(seeds, params_flat, unflatten, params_fixed, log_prob, False, grad_clipping, eps_schedule)
     return elbos.mean(), (elbos, x)
 
 
-def compute_log_var(seeds, params_flat, unflatten, params_fixed, log_prob,
-                    grad_clipping=False,
-                    eps_schedule="none", ):
-    elbos, (x, _) = jax.vmap(per_sample_elbo, in_axes=(0, None, None, None, None, None, None, None))(
-        seeds, params_flat, unflatten, params_fixed, log_prob, True, grad_clipping, eps_schedule
-    )
+def compute_log_var(
+    seeds,
+    params_flat,
+    unflatten,
+    params_fixed,
+    log_prob,
+    grad_clipping=False,
+    eps_schedule="none",
+):
+    elbos, (x, _) = jax.vmap(
+        per_sample_elbo, in_axes=(0, None, None, None, None, None, None, None)
+    )(seeds, params_flat, unflatten, params_fixed, log_prob, True, grad_clipping, eps_schedule)
     return jnp.clip(elbos.var(ddof=0), -1e7, 1e7), (elbos, x)
 
 
 def evolve_overdamped_cmcd_reverse(
-        z,
-        betas,
-        params,
-        rng_key_gen,
-        params_fixed,
-        log_prob_model,
-        sample_kernel,
-        log_prob_kernel,
-        grad_clipping=False,
-        eps_schedule='None',
+    z,
+    betas,
+    params,
+    rng_key_gen,
+    params_fixed,
+    log_prob_model,
+    sample_kernel,
+    log_prob_kernel,
+    grad_clipping=False,
+    eps_schedule="None",
 ):
     def U(z, beta):
-        return -1.0 * (
-                beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z)
-        )
+        return -1.0 * (beta * log_prob_model(z) + (1.0 - beta) * bd.log_prob(params["bd"], z))
 
     def gradU(z, beta, clip=1e3):
         p = lambda z: bd.log_prob(params["bd"], z)
@@ -200,14 +228,16 @@ def evolve_overdamped_cmcd_reverse(
 
         # Backwards kernel
         ub = gradU(z, beta) if stable else jax.grad(U)(z, beta)
-        bk_mean = (z - eps * ub + eps * apply_fun_approx_network(params["approx_network"], z, i + 1))
+        bk_mean = z - eps * ub + eps * apply_fun_approx_network(params["approx_network"], z, i + 1)
 
         # Sample
         rng_key, rng_key_gen = jax.random.split(rng_key_gen)
         z_new = sample_kernel(rng_key, bk_mean, scale)
 
         uf = gradU(z_new, beta) if stable else jax.grad(U)(z_new, beta)
-        fk_mean = z_new - eps * uf - eps * apply_fun_approx_network(params["approx_network"], z_new, i)
+        fk_mean = (
+            z_new - eps * uf - eps * apply_fun_approx_network(params["approx_network"], z_new, i)
+        )
 
         # Evaluate kernels
         fk_log_prob = log_prob_kernel(z, fk_mean, scale)
@@ -228,9 +258,16 @@ def evolve_overdamped_cmcd_reverse(
     return z, w, None
 
 
-def per_sample_eubo(seed, params_flat, unflatten, params_fixed, log_prob, target_samples,
-                    grad_clipping=False,
-                    eps_schedule="none", ):
+def per_sample_eubo(
+    seed,
+    params_flat,
+    unflatten,
+    params_fixed,
+    log_prob,
+    target_samples,
+    grad_clipping=False,
+    eps_schedule="none",
+):
     params_train, params_notrain = unflatten(params_flat)
     params_notrain = jax.lax.stop_gradient(params_notrain)
     params = {**params_train, **params_notrain}  # Gets all parameters in single place
@@ -241,7 +278,7 @@ def per_sample_eubo(seed, params_flat, unflatten, params_fixed, log_prob, target
         gridref_y = jnp.concatenate([jnp.array([0.0]), gridref_y])
         betas = jnp.interp(params["target_x"], params["gridref_x"], gridref_y)
     else:
-        raise ValueError('Number of temperatures smaller 1.')
+        raise ValueError("Number of temperatures smaller 1.")
 
     rng_key_gen = jax.random.PRNGKey(seed)
 
@@ -252,7 +289,14 @@ def per_sample_eubo(seed, params_flat, unflatten, params_fixed, log_prob, target
     if num_temps >= 1:
         rng_key, rng_key_gen = jax.random.split(rng_key_gen)
         x, w_t, _ = evolve_overdamped_cmcd_reverse(
-            x, betas, params, rng_key, params_fixed, log_prob, sample_kernel, log_prob_kernel,
+            x,
+            betas,
+            params,
+            rng_key,
+            params_fixed,
+            log_prob,
+            sample_kernel,
+            log_prob_kernel,
             grad_clipping=grad_clipping,
             eps_schedule=eps_schedule,
         )

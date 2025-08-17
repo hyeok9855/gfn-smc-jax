@@ -18,12 +18,14 @@ class Brownian(Target):
 
     def log_prob(self, z: chex.Array):
         x = self.target.default_event_space_bijector(z)
-        return (self.target.unnormalized_log_prob(
-            x) + self.target.default_event_space_bijector.forward_log_det_jacobian(z, event_ndims=1))
+        return self.target.unnormalized_log_prob(
+            x
+        ) + self.target.default_event_space_bijector.forward_log_det_jacobian(z, event_ndims=1)
 
-    def visualise(self, samples: chex.Array = None, axes: List[plt.Axes] = None, show=False, prefix='') -> dict:
+    def visualise(
+        self, samples: chex.Array = None, axes: List[plt.Axes] = None, show=False, prefix=""
+    ) -> dict:
         return {}
-
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         return None

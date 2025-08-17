@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 from typing import Optional, Tuple
 import itertools
 
@@ -9,10 +10,9 @@ import chex
 import pandas as pd
 
 
-def plot_contours_2D(log_prob_func,
-                     ax: Optional[plt.Axes] = None,
-                     bound: float = 3,
-                     levels: int = 20):
+def plot_contours_2D(
+    log_prob_func, ax: Optional[plt.Axes] = None, bound: float = 3, levels: int = 20
+):
     """Plot the contours of a 2D log prob function."""
     if ax is None:
         fig, ax = plt.subplots(1)
@@ -29,12 +29,13 @@ def plot_contours_2D(log_prob_func,
     # ax.contourf(x1, x2, np.exp(z), levels = 20, cmap = 'viridis')
 
 
-
-def plot_marginal_pair(samples: chex.Array,
-                  ax: Optional[plt.Axes] = None,
-                  marginal_dims: Tuple[int, int] = (0, 1),
-                  bounds: Tuple[float, float] = (-5, 5),
-                  alpha: float = 0.5):
+def plot_marginal_pair(
+    samples: chex.Array,
+    ax: Optional[plt.Axes] = None,
+    marginal_dims: Tuple[int, int] = (0, 1),
+    bounds: Tuple[float, float] = (-5, 5),
+    alpha: float = 0.5,
+):
     """Plot samples from marginal of distribution for a given pair of dimensions."""
     if not ax:
         fig, ax = plt.subplots(1)
@@ -58,7 +59,6 @@ def plot_history(history):
         axs[i].plot(data)
         axs[i].set_title(key)
     plt.tight_layout()
-
 
 
 # code from setup_training

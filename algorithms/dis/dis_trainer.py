@@ -3,7 +3,6 @@ Time-Reversed Diffusion Sampler (DIS)
 For further details see https://openreview.net/pdf?id=oYIjw37pTP
 """
 
-
 from functools import partial
 from time import time
 
@@ -25,8 +24,9 @@ def dis_trainer(cfg, target):
     alg_cfg = cfg.algorithm
 
     # Define initial and target density
-    initial_density = distrax.MultivariateNormalDiag(jnp.zeros(dim),
-                                                     jnp.ones(dim) * alg_cfg.init_std)
+    initial_density = distrax.MultivariateNormalDiag(
+        jnp.zeros(dim), jnp.ones(dim) * alg_cfg.init_std
+    )
     aux_tuple = (alg_cfg.init_std, initial_density.sample, initial_density.log_prob)
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
@@ -37,9 +37,15 @@ def dis_trainer(cfg, target):
     noise_schedule = alg_cfg.noise_schedule
 
     loss = jax.jit(jax.grad(neg_elbo, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
-    rnd_short = partial(rnd, batch_size=cfg.eval_samples, aux_tuple=aux_tuple,
-                        target=target, num_steps=cfg.algorithm.num_steps,
-                        noise_schedule=cfg.algorithm.noise_schedule, stop_grad=True)
+    rnd_short = partial(
+        rnd,
+        batch_size=cfg.eval_samples,
+        aux_tuple=aux_tuple,
+        target=target,
+        num_steps=cfg.algorithm.num_steps,
+        noise_schedule=cfg.algorithm.noise_schedule,
+        stop_grad=True,
+    )
 
     eval_fn, logger = get_eval_fn(rnd_short, target, target_samples, cfg)
 
@@ -48,8 +54,16 @@ def dis_trainer(cfg, target):
     for step in range(alg_cfg.iters):
         key, key_gen = jax.random.split(key_gen)
         iter_time = time()
-        grads, _ = loss(key, model_state, model_state.params, alg_cfg.batch_size,
-                        aux_tuple, target, alg_cfg.num_steps, alg_cfg.noise_schedule)
+        grads, _ = loss(
+            key,
+            model_state,
+            model_state.params,
+            alg_cfg.batch_size,
+            aux_tuple,
+            target,
+            alg_cfg.num_steps,
+            alg_cfg.noise_schedule,
+        )
         timer += time() - iter_time
 
         model_state = model_state.apply_gradients(grads=grads)

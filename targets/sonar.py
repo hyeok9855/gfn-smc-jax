@@ -22,7 +22,7 @@ def pad_with_const(X):
 def standardize_and_pad(X):
     mean = np.mean(X, axis=0)
     std = np.std(X, axis=0)
-    std[std == 0] = 1.
+    std[std == 0] = 1.0
     X = (X - mean) / std
     return pad_with_const(X)
 
@@ -31,10 +31,10 @@ def load_model_sonar():
     def model(Y):
         w = numpyro.sample("weights", pydist.Normal(jnp.zeros(dim), jnp.ones(dim)))
         logits = jnp.dot(X, w)
-        with numpyro.plate('J', n_data):
+        with numpyro.plate("J", n_data):
             y = numpyro.sample("y", pydist.BernoulliLogits(logits), obs=Y)
 
-    with open(project_path('targets/data/sonar_full.pkl'), 'rb') as f:
+    with open(project_path("targets/data/sonar_full.pkl"), "rb") as f:
         X, Y = pickle.load(f)
 
     Y = (Y + 1) // 2
@@ -53,10 +53,11 @@ class Sonar(Target):
 
         rng_key = jax.random.PRNGKey(1)
         model, model_args = load_model_sonar()
-        model_param_info, potential_fn, constrain_fn, _ = numpyro.infer.util.initialize_model(rng_key, model,
-                                                                                              model_args=model_args)
+        model_param_info, potential_fn, constrain_fn, _ = numpyro.infer.util.initialize_model(
+            rng_key, model, model_args=model_args
+        )
         params_flat, unflattener = ravel_pytree(model_param_info[0])
-        self.log_prob_model = lambda z: -1. * potential_fn(unflattener(z))
+        self.log_prob_model = lambda z: -1.0 * potential_fn(unflattener(z))
 
     def get_dim(self):
         return self.dim
@@ -75,9 +76,8 @@ class Sonar(Target):
 
         return log_probs
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         return {}
-
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         return None

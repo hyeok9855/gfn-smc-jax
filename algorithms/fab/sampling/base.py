@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 from typing import Dict, NamedTuple, Optional, Callable, Tuple, Protocol, Union
 
 import chex
@@ -10,6 +11,7 @@ LogProbFn = Callable[[chex.Array], chex.Array]
 
 class Point(NamedTuple):
     """State of the MCMC chain, specifically designed for FAB."""
+
     x: chex.Array
     log_q: chex.Array
     log_p: chex.Array
@@ -19,16 +21,19 @@ class Point(NamedTuple):
 
 TransitionOperatorState = chex.ArrayTree
 
+
 class TransitionOperatorStep(Protocol):
-    def __call__(self,
-             point: Point,
-             transition_operator_state: TransitionOperatorState,
-             beta: chex.Array,
-             alpha: float,
-             log_q_fn: LogProbFn,
-             log_p_fn: LogProbFn) -> Tuple[Point, TransitionOperatorState, Dict]:
+    def __call__(
+        self,
+        point: Point,
+        transition_operator_state: TransitionOperatorState,
+        beta: chex.Array,
+        alpha: float,
+        log_q_fn: LogProbFn,
+        log_p_fn: LogProbFn,
+    ) -> Tuple[Point, TransitionOperatorState, Dict]:
         """Perform MCMC step with the intermediate target given by:
-            \log target = ((1-beta) + beta*(1-alpha)) * log_q + beta*alpha*log_p
+        \log target = ((1-beta) + beta*(1-alpha)) * log_q + beta*alpha*log_p
         """
 
 
@@ -40,9 +45,13 @@ class TransitionOperator(NamedTuple):
 
 
 class AISForwardFn(Protocol):
-    def __call__(self, sample_q_fn: Callable[[chex.PRNGKey], chex.Array],
-                 log_q_fn: LogProbFn, log_p_fn: LogProbFn,
-                 ais_state: chex.Array) -> [chex.Array, chex.Array, chex.ArrayTree, Dict]:
+    def __call__(
+        self,
+        sample_q_fn: Callable[[chex.PRNGKey], chex.Array],
+        log_q_fn: LogProbFn,
+        log_p_fn: LogProbFn,
+        ais_state: chex.Array,
+    ) -> [chex.Array, chex.Array, chex.ArrayTree, Dict]:
         """
 
         Args:
@@ -59,8 +68,9 @@ class AISForwardFn(Protocol):
         """
 
 
-def create_point(x: chex.Array, log_q_fn: LogProbFn, log_p_fn: LogProbFn,
-                 with_grad: bool = True) -> Point:
+def create_point(
+    x: chex.Array, log_q_fn: LogProbFn, log_p_fn: LogProbFn, with_grad: bool = True
+) -> Point:
     """Create an instance of a `Point` which contains the necessary info on a point for MCMC."""
     chex.assert_rank(x, 1)
     if with_grad:
@@ -71,29 +81,26 @@ def create_point(x: chex.Array, log_q_fn: LogProbFn, log_p_fn: LogProbFn,
         return Point(x=x, log_q=log_q_fn(x), log_p=log_p_fn(x))
 
 
-
 def get_intermediate_log_prob(
-        log_q: chex.Array,
-        log_p: chex.Array,
-        beta: chex.Array,
-        alpha: Union[chex.Array, float],
-        ) -> chex.Array:
+    log_q: chex.Array,
+    log_p: chex.Array,
+    beta: chex.Array,
+    alpha: Union[chex.Array, float],
+) -> chex.Array:
     """Get log prob of point according to intermediate AIS distribution.
     Set AIS final target g=p^\alpha q^(1-\alpha).
     log_prob = (1 - beta) log_q + beta log_g.
     """
-    return ((1-beta) + beta*(1-alpha)) * log_q + beta*alpha*log_p
-
+    return ((1 - beta) + beta * (1 - alpha)) * log_q + beta * alpha * log_p
 
 
 def get_grad_intermediate_log_prob(
-        grad_log_q: chex.Array,
-        grad_log_p: chex.Array,
-        beta: chex.Array,
-        alpha: Union[chex.Array, float],
+    grad_log_q: chex.Array,
+    grad_log_p: chex.Array,
+    beta: chex.Array,
+    alpha: Union[chex.Array, float],
 ) -> chex.Array:
     """Get gradient of intermediate AIS distribution for a point.
     Set AIS final target g=p^\alpha q^(1-\alpha). log_prob = (1 - beta) log_q + beta log_g.
     """
-    return ((1-beta) + beta*(1-alpha)) * grad_log_q + beta*alpha*grad_log_p
-
+    return ((1 - beta) + beta * (1 - alpha)) * grad_log_q + beta * alpha * grad_log_p

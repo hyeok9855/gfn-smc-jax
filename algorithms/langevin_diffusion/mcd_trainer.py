@@ -14,8 +14,8 @@ from utils.print_util import print_results
 
 
 def mcd_trainer(
-        cfg,
-        target,
+    cfg,
+    target,
 ):
 
     # Unpack cfg
@@ -33,9 +33,13 @@ def mcd_trainer(
 
     base_dist_params = None
 
-    params_flat, unflatten, params_fixed = initialize_mcd(cfg, dim, base_dist_params=base_dist_params)
+    params_flat, unflatten, params_fixed = initialize_mcd(
+        cfg, dim, base_dist_params=base_dist_params
+    )
 
-    evaluate = eval_langevin(per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg)
+    evaluate = eval_langevin(
+        per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg
+    )
 
     elbo_grad = jax.jit(jax.grad(compute_elbo, 1, has_aux=True), static_argnums=(2, 3, 4))
     opt_init, update, get_params = adam(lr)
@@ -57,7 +61,7 @@ def mcd_trainer(
         train_losses.append(jnp.mean(elbo).item())
         if jnp.isnan(jnp.mean(elbo)):
             print("Diverged")
-            logger['stats/succ'] = 0
+            logger["stats/succ"] = 0
             return [], True, params_flat, logger
         opt_state = update(i, grad, opt_state, unflatten, trainable)
         timer += time() - iter_time

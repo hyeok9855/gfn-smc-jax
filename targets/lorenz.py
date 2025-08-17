@@ -26,19 +26,21 @@ class Lorenz(Target):
             z = z[None,]
 
         x = self.target.default_event_space_bijector(z)
-        log_prob = (self.target.unnormalized_log_prob(x) +
-                    self.target.default_event_space_bijector.forward_log_det_jacobian(z, event_ndims=1))
+        log_prob = self.target.unnormalized_log_prob(
+            x
+        ) + self.target.default_event_space_bijector.forward_log_det_jacobian(z, event_ndims=1)
 
         if not batched:
             log_prob = jnp.squeeze(log_prob, axis=0)
 
         return log_prob
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         return {}
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         return None
+
 
 if __name__ == "__main__":
     key = jax.random.PRNGKey(42)

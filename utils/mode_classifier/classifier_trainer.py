@@ -15,14 +15,10 @@ from utils.mode_classifier.data_utils import load_dataset
 from utils.path_utils import project_path
 
 
-
 def compute_metrics(logits, labels):
     loss = jnp.mean(optax.softmax_cross_entropy(logits, jax.nn.one_hot(labels, num_classes=10)))
     accuracy = jnp.mean(jnp.argmax(logits, -1) == labels)
-    metrics = {
-        'loss': loss,
-        'accuracy': accuracy
-    }
+    metrics = {"loss": loss, "accuracy": accuracy}
     return metrics
 
 
@@ -30,21 +26,21 @@ def get_datasets(dataset):
     ds_builder = tfds.builder(dataset)
     ds_builder.download_and_prepare()
     # Split into training/test sets
-    train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=-1))
-    test_ds = tfds.as_numpy(ds_builder.as_dataset(split='test', batch_size=-1))
+    train_ds = tfds.as_numpy(ds_builder.as_dataset(split="train", batch_size=-1))
+    test_ds = tfds.as_numpy(ds_builder.as_dataset(split="test", batch_size=-1))
     # Convert to floating-points
-    train_ds['image'] = jnp.float32(train_ds['image']) / 255.0
-    test_ds['image'] = jnp.float32(test_ds['image']) / 255.0
+    train_ds["image"] = jnp.float32(train_ds["image"]) / 255.0
+    test_ds["image"] = jnp.float32(test_ds["image"]) / 255.0
     return train_ds, test_ds
 
 
 @jax.jit
 def train_step(state, x, y):
     def loss_fn(params):
-        logits = FashionMnistCNN().apply({'params': params}, x)
-        loss = jnp.mean(optax.softmax_cross_entropy(
-            logits=logits,
-            labels=jax.nn.one_hot(y, num_classes=10)))
+        logits = FashionMnistCNN().apply({"params": params}, x)
+        loss = jnp.mean(
+            optax.softmax_cross_entropy(logits=logits, labels=jax.nn.one_hot(y, num_classes=10))
+        )
         return loss, logits
 
     grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
@@ -56,7 +52,7 @@ def train_step(state, x, y):
 
 @jax.jit
 def eval_step(params, batch_x, batch_y):
-    logits = FashionMnistCNN().apply({'params': params}, batch_x)
+    logits = FashionMnistCNN().apply({"params": params}, batch_x)
     return compute_metrics(logits, batch_y)
 
 
@@ -70,10 +66,13 @@ def train_epoch(state, train_ds, epoch):
     training_batch_metrics = jax.device_get(batch_metrics)
     training_epoch_metrics = {
         k: np.mean([metrics[k] for metrics in training_batch_metrics])
-        for k in training_batch_metrics[0]}
+        for k in training_batch_metrics[0]
+    }
 
-    print('Training - epoch: %d, loss: %.4f, accuracy: %.2f' % (
-        epoch, training_epoch_metrics['loss'], training_epoch_metrics['accuracy'] * 100))
+    print(
+        "Training - epoch: %d, loss: %.4f, accuracy: %.2f"
+        % (epoch, training_epoch_metrics["loss"], training_epoch_metrics["accuracy"] * 100)
+    )
 
     return state, training_epoch_metrics
 
@@ -86,11 +85,13 @@ def eval(state, test_ds, epoch):
 
     test_batch_metrics = jax.device_get(batch_metrics)
     test_epoch_metrics = {
-        k: np.mean([metrics[k] for metrics in test_batch_metrics])
-        for k in test_batch_metrics[0]}
+        k: np.mean([metrics[k] for metrics in test_batch_metrics]) for k in test_batch_metrics[0]
+    }
 
-    print('Test - epoch: %d, loss: %.4f, accuracy: %.2f' % (
-        epoch, test_epoch_metrics['loss'], test_epoch_metrics['accuracy'] * 100))
+    print(
+        "Test - epoch: %d, loss: %.4f, accuracy: %.2f"
+        % (epoch, test_epoch_metrics["loss"], test_epoch_metrics["accuracy"] * 100)
+    )
 
     return state, test_epoch_metrics
 
@@ -99,16 +100,16 @@ def eval_model(model, batch_x, batch_y):
     metrics = eval_step(model, batch_x, batch_y)
     metrics = jax.device_get(metrics)
     eval_summary = jax.tree_map(lambda x: x.item(), metrics)
-    return eval_summary['loss'], eval_summary['accuracy']
+    return eval_summary["loss"], eval_summary["accuracy"]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     BATCHSIZE = 128
     IMSIZE = 28
     ALPHA = 0.05
     BITS = 3
     NUM_EPOCHS = 300
-    SAVE_DIR = project_path('utils/mode_classifier/')
+    SAVE_DIR = project_path("utils/mode_classifier/")
 
     DATASET = "fashion_mnist"
 
@@ -121,13 +122,13 @@ if __name__ == '__main__':
     if DATASET == "fashion_mnist":
         cnn = FashionMnistCNN()
     elif DATASET == "mnist":
-        cnn= CNN()
+        cnn = CNN()
     else:
         raise NotImplementedError
     nesterov_momentum = 0.9
     learning_rate = 0.001
     tx = optax.sgd(learning_rate=learning_rate, nesterov=nesterov_momentum)
-    params = cnn.init(init_rng, jnp.ones([1, IMSIZE, IMSIZE, 1]))['params']
+    params = cnn.init(init_rng, jnp.ones([1, IMSIZE, IMSIZE, 1]))["params"]
     state = train_state.TrainState.create(apply_fn=cnn.apply, params=params, tx=tx)
 
     num_epochs = NUM_EPOCHS
@@ -145,7 +146,12 @@ if __name__ == '__main__':
         # Evaluate on the test set after each training epoch
         eval(state, ds_test, epoch)
 
-    checkpoints.save_checkpoint(ckpt_dir=SAVE_DIR, target=state, step=0, prefix="{}_{}x{}_classifier_checkpoint_".format(DATASET, IMSIZE, IMSIZE))
+    checkpoints.save_checkpoint(
+        ckpt_dir=SAVE_DIR,
+        target=state,
+        step=0,
+        prefix="{}_{}x{}_classifier_checkpoint_".format(DATASET, IMSIZE, IMSIZE),
+    )
 
     # logits = CNN().apply({'params': state.params}, target_samples.reshape((-1, IMSIZE, IMSIZE, 1)))
     # idx = jnp.argmax(logits, -1)

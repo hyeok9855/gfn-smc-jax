@@ -10,6 +10,7 @@ import ml_collections
 import numpy as np
 import wandb
 from chex import Array
+
 # from configs.base import FUNNEL_EPS_DICT, LR_DICT
 from jax import scipy as jscipy
 
@@ -59,16 +60,12 @@ def plot_contours_2D(
 
 
 # Taken from https://github.com/lollcat/fab-jax/blob/632e0a7d3dbd8da6b2ef043ab41e2346f29dfece/fabjax/utils/plot.py#L30
-def plot_marginal_pair(
-    samples, ax=None, marginal_dims=(0, 1), bounds=(-5, 5), alpha: float = 0.5
-):
+def plot_marginal_pair(samples, ax=None, marginal_dims=(0, 1), bounds=(-5, 5), alpha: float = 0.5):
     """Plot samples from marginal of distribution for a given pair of dimensions."""
     if not ax:
         fig, ax = plt.subplots(1)
     samples = jnp.clip(samples, bounds[0], bounds[1])
-    ax.plot(
-        samples[:, marginal_dims[0]], samples[:, marginal_dims[1]], "o", alpha=alpha
-    )
+    ax.plot(samples[:, marginal_dims[0]], samples[:, marginal_dims[1]], "o", alpha=alpha)
 
 
 def plot_gmm(samples, log_p_fn, loc_scaling, wandb_prefix: str = ""):
@@ -201,7 +198,6 @@ def setup_training(wandb_run):
 #         )
 #
 #     return new_vals
-
 
 
 def log_final_losses(eval_losses, log_prefix=""):

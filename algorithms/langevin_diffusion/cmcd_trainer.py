@@ -8,14 +8,19 @@ from algorithms.langevin_diffusion.ld_eval import eval_langevin
 from algorithms.langevin_diffusion.ld_init import initialize_cmcd
 from algorithms.langevin_diffusion.ld_utils import collect_eps
 from algorithms.langevin_diffusion.optimizer import adam
-from algorithms.langevin_diffusion.cmcd import compute_elbo, per_sample_elbo, per_sample_eubo, compute_log_var
+from algorithms.langevin_diffusion.cmcd import (
+    compute_elbo,
+    per_sample_elbo,
+    per_sample_eubo,
+    compute_log_var,
+)
 from utils.print_util import print_results
 
 
 def cmcd_trainer(
-        cfg,
-        target,
-        base_dist_params=None,
+    cfg,
+    target,
+    base_dist_params=None,
 ):
     # Unpack cfg
     dim = target.dim
@@ -29,12 +34,18 @@ def cmcd_trainer(
     target_log_prob = target.log_prob
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
-    params_flat, unflatten, params_fixed = initialize_cmcd(cfg, dim, base_dist_params=base_dist_params)
+    params_flat, unflatten, params_fixed = initialize_cmcd(
+        cfg, dim, base_dist_params=base_dist_params
+    )
 
-    evaluate = eval_langevin(per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg)
+    evaluate = eval_langevin(
+        per_sample_elbo, per_sample_eubo, unflatten, params_fixed, target, target_samples, cfg
+    )
 
     if alg_cfg.loss == "var_grad":
-        elbo_grad = jax.jit(jax.grad(compute_log_var, 1, has_aux=True), static_argnums=(2, 3, 4, 5, 6))
+        elbo_grad = jax.jit(
+            jax.grad(compute_log_var, 1, has_aux=True), static_argnums=(2, 3, 4, 5, 6)
+        )
     elif alg_cfg.loss == "elbo":
         elbo_grad = jax.jit(jax.grad(compute_elbo, 1, has_aux=True), static_argnums=(2, 3, 4, 5, 6))
     else:
@@ -55,13 +66,20 @@ def cmcd_trainer(
         seeds = jax.random.split(key_gen, num=alg_cfg.batch_size)[:, 0]
         params_flat = get_params(opt_state)
 
-        grad, (elbo, x) = elbo_grad(seeds, params_flat, unflatten, params_fixed, target_log_prob, alg_cfg.grad_clipping,
-                                    alg_cfg.eps_schedule)
+        grad, (elbo, x) = elbo_grad(
+            seeds,
+            params_flat,
+            unflatten,
+            params_fixed,
+            target_log_prob,
+            alg_cfg.grad_clipping,
+            alg_cfg.eps_schedule,
+        )
 
         train_losses.append(jnp.mean(elbo).item())
         if jnp.isnan(jnp.mean(elbo)):
             print("Diverged")
-            logger['stats/succ'] = 0
+            logger["stats/succ"] = 0
             return [], True, params_flat, logger
         opt_state = update(i, grad, opt_state, unflatten, trainable)
         timer += time() - iter_time

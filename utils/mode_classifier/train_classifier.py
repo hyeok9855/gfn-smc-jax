@@ -48,6 +48,7 @@ def get_config():
 
     return config
 
+
 def dequantize(x, y, n_bits=3):
     n_bins = 2.0**n_bits
     x = tf.cast(x, tf.float32)
@@ -74,16 +75,12 @@ def load_dataset(split: str, batch_size: int, im_size: int, alpha: float, n_bits
     """Loads the dataset as a generator of batches."""
     ds, ds_info = tfds.load("mnist", split=split, as_supervised=True, with_info=True)
     ds = ds.cache()
-    ds = ds.map(
-        lambda x, y: resize(x, y, im_size=im_size), num_parallel_calls=tf.data.AUTOTUNE
-    )
+    ds = ds.map(lambda x, y: resize(x, y, im_size=im_size), num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.map(
         lambda x, y: dequantize(x, y, n_bits=n_bits),
         num_parallel_calls=tf.data.AUTOTUNE,
     )
-    ds = ds.map(
-        lambda x, y: logit(x, y, alpha=alpha), num_parallel_calls=tf.data.AUTOTUNE
-    )
+    ds = ds.map(lambda x, y: logit(x, y, alpha=alpha), num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.shuffle(ds_info.splits["train"].num_examples)
     ds = ds.batch(batch_size, drop_remainder=True)
     ds = ds.prefetch(tf.data.AUTOTUNE)
@@ -128,9 +125,7 @@ def main(config):
         rng_seq = hk.PRNGSequence(config.seed)
 
         # load data
-        ds = load_dataset(
-            "train", config.batch_size, config.im_size, config.alpha, config.n_bits
-        )
+        ds = load_dataset("train", config.batch_size, config.im_size, config.alpha, config.n_bits)
         ds_test = load_dataset(
             "test", config.batch_size, config.im_size, config.alpha, config.n_bits
         )

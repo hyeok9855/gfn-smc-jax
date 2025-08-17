@@ -3,6 +3,7 @@ Code for Denoising Diffusion Sampler (DDS)
 For further details see https://arxiv.org/abs/2302.13834
 Code based on https://github.com/franciscovargas/denoising_diffusion_samplers
 """
+
 from functools import partial
 from time import time
 
@@ -24,9 +25,15 @@ def dds_trainer(cfg, target):
     alg_cfg = cfg.algorithm
 
     # Define initial and target density
-    initial_density = distrax.MultivariateNormalDiag(jnp.zeros(dim),
-                                                     jnp.ones(dim) * alg_cfg.init_std)
-    aux_tuple = (alg_cfg.init_std, initial_density.sample, initial_density.log_prob, alg_cfg.noise_scale)
+    initial_density = distrax.MultivariateNormalDiag(
+        jnp.zeros(dim), jnp.ones(dim) * alg_cfg.init_std
+    )
+    aux_tuple = (
+        alg_cfg.init_std,
+        initial_density.sample,
+        initial_density.log_prob,
+        alg_cfg.noise_scale,
+    )
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
     # Initialize the model
@@ -34,9 +41,15 @@ def dds_trainer(cfg, target):
     model_state = init_model(key, dim, alg_cfg)
 
     loss = jax.jit(jax.grad(neg_elbo, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
-    rnd_short = partial(rnd, batch_size=cfg.eval_samples, initial_density_tuple=aux_tuple,
-                        target=target, num_steps=cfg.algorithm.num_steps,
-                        noise_schedule=cfg.algorithm.noise_schedule, stop_grad=True)
+    rnd_short = partial(
+        rnd,
+        batch_size=cfg.eval_samples,
+        initial_density_tuple=aux_tuple,
+        target=target,
+        num_steps=cfg.algorithm.num_steps,
+        noise_schedule=cfg.algorithm.noise_schedule,
+        stop_grad=True,
+    )
 
     eval_fn, logger = get_eval_fn(rnd_short, target, target_samples, cfg)
 
@@ -45,8 +58,16 @@ def dds_trainer(cfg, target):
     for step in range(alg_cfg.iters):
         key, key_gen = jax.random.split(key_gen)
         iter_time = time()
-        grads, _ = loss(key, model_state, model_state.params, alg_cfg.batch_size,
-                        aux_tuple, target, alg_cfg.num_steps, alg_cfg.noise_schedule)
+        grads, _ = loss(
+            key,
+            model_state,
+            model_state.params,
+            alg_cfg.batch_size,
+            aux_tuple,
+            target,
+            alg_cfg.num_steps,
+            alg_cfg.noise_schedule,
+        )
         timer += time() - iter_time
 
         model_state = model_state.apply_gradients(grads=grads)

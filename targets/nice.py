@@ -1,5 +1,5 @@
-"""NICE TARGET
-"""
+"""NICE TARGET"""
+
 import functools
 import os
 import math
@@ -122,33 +122,42 @@ def load_model_nice(dataset: str, dim: int):
 
     im_size = int(jnp.sqrt(dim))
 
-    pickle_file = project_path() + "/targets/data/" + f"params_nice_{dataset}_{im_size}x{im_size}_flax.pkl"
+    pickle_file = (
+        project_path() + "/targets/data/" + f"params_nice_{dataset}_{im_size}x{im_size}_flax.pkl"
+    )
     loaded_params = pickle.load(open(pickle_file, "rb"))
 
     model = NICE(dim=dim)
     logpx_fn = lambda x: model.apply(loaded_params, x, method=model.logpx)
-    sample_fn = lambda key, batch_size: model.apply(loaded_params, key, batch_size, method=model.sample)
+    sample_fn = lambda key, batch_size: model.apply(
+        loaded_params, key, batch_size, method=model.sample
+    )
 
     return logpx_fn, None, sample_fn
 
 
 def classify(x, cnn, params, im_size):
-    logits = cnn.apply({'params': params}, x.reshape((-1, im_size, im_size, 1)))
+    logits = cnn.apply({"params": params}, x.reshape((-1, im_size, im_size, 1)))
     return jnp.argmax(logits, -1)
 
 
 class NiceTarget(Target):
-    def __init__(self, dim, dataset="mnist", log_Z=0., can_sample=True, sample_bounds=None) -> None:
+    def __init__(
+        self, dim, dataset="mnist", log_Z=0.0, can_sample=True, sample_bounds=None
+    ) -> None:
         super().__init__(dim, log_Z, can_sample)
         self.data_ndim = dim
         self.im_size = int(np.sqrt(dim))
 
         self.logpx_fn_without_rng, _, self.sample_fn_clean = load_model_nice(dataset, dim)
 
-        state = checkpoints.restore_checkpoint(ckpt_dir=project_path('utils/mode_classifier'), target=None,
-                                               prefix="{}_{}x{}_classifier_checkpoint".format(dataset,
-                                                                                              int(math.sqrt(dim)),
-                                                                                              int(math.sqrt(dim))))
+        state = checkpoints.restore_checkpoint(
+            ckpt_dir=project_path("utils/mode_classifier"),
+            target=None,
+            prefix="{}_{}x{}_classifier_checkpoint".format(
+                dataset, int(math.sqrt(dim)), int(math.sqrt(dim))
+            ),
+        )
 
         if dataset == "mnist":
             classifier = CNN()
@@ -158,7 +167,10 @@ class NiceTarget(Target):
             raise NotImplementedError
 
         self.classify = jax.jit(
-            functools.partial(classify, cnn=classifier, params=state['params'], im_size=self.im_size))
+            functools.partial(
+                classify, cnn=classifier, params=state["params"], im_size=self.im_size
+            )
+        )
 
     def get_dim(self):
         return self.dim
@@ -191,10 +203,9 @@ class NiceTarget(Target):
         entropy = -jnp.sum(mode_dist * (jnp.log(mode_dist) / jnp.log(10)))
         return entropy
 
-    def visualise(self,
-                  samples: chex.Array,
-                  axes: List[plt.Axes] = None,
-                  show=False, prefix='') -> None:
+    def visualise(
+        self, samples: chex.Array, axes: List[plt.Axes] = None, show=False, prefix=""
+    ) -> None:
         plt.close()
         n = 64
         x = np.array(samples[:n].reshape(-1, self.im_size, self.im_size))
@@ -205,8 +216,8 @@ class NiceTarget(Target):
         # Plot each image
         for i in range(n_rows):
             for j in range(n_rows):
-                ax[i, j].imshow(x[i * n_rows + j], cmap='gray')
-                ax[i, j].axis('off')
+                ax[i, j].imshow(x[i * n_rows + j], cmap="gray")
+                ax[i, j].axis("off")
 
         # plt.savefig(os.path.join(project_path('./figures/'), f"{prefix}nice.pdf"), bbox_inches='tight', pad_inches=0.1)
         # Log into wandb
@@ -217,7 +228,7 @@ class NiceTarget(Target):
         return wb
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # nice = NiceTarget(dim=196)
     # key = jax.random.PRNGKey(2)
     # samples = nice.sample(key, (64,))
@@ -227,15 +238,28 @@ if __name__ == '__main__':
     # lp =jax.jit(jax.vmap(nice.log_prob, in_axes=(0,)))
     # # print(lp(zeros))
     # algs = ['gmmvi_jax', 'smc', 'aft', 'craft', 'fab', 'mcd', 'ldvi', 'pis2', 'dis', 'dds2', 'gsb']
-    algs = ['mfvi', 'gmmvi_jax', 'smc', 'aft', 'craft', 'fab', 'mcd', 'ldvi', 'pis2', 'dis', 'dds2', 'gsb']
-    algs = ['gmmvi_jax', 'smc', 'aft', 'craft', 'fab', 'mcd', 'ldvi', 'pis2', 'dis', 'dds2', 'gsb']
-    algs = ['gmmvi_jax']
+    algs = [
+        "mfvi",
+        "gmmvi_jax",
+        "smc",
+        "aft",
+        "craft",
+        "fab",
+        "mcd",
+        "ldvi",
+        "pis2",
+        "dis",
+        "dds2",
+        "gsb",
+    ]
+    algs = ["gmmvi_jax", "smc", "aft", "craft", "fab", "mcd", "ldvi", "pis2", "dis", "dds2", "gsb"]
+    algs = ["gmmvi_jax"]
     #### Generate Digit Visualizations
     nice = NiceTarget(dim=196)
     for alg in algs:
-        path = project_path(f'samples/digits/samples_{alg}_nice_digits_196D_seed1.npy')
+        path = project_path(f"samples/digits/samples_{alg}_nice_digits_196D_seed1.npy")
         samples = jnp.load(path)
-        nice.visualise(samples, show=True, prefix=f'{alg}_digits')
+        nice.visualise(samples, show=True, prefix=f"{alg}_digits")
 
     # #### Generate Fashion Visualizations
     # nice = NiceTarget(dataset='fashion_mnist', dim=784)

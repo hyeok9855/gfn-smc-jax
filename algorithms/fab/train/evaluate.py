@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 from typing import Union
 import jax
 import jax.numpy as jnp
@@ -15,7 +16,7 @@ from targets.base_target import Target
 
 
 def setup_fab_eval_function(flow: Flow, ais: SequentialMonteCarloSampler, target: Target, config):
-    assert ais.alpha == 1.  # Make sure target is set to p.
+    assert ais.alpha == 1.0  # Make sure target is set to p.
     assert ais.use_resampling is False  # Make sure we are doing AIS, not SMC.
 
     # def eval_fn(state: Union[TrainStateNoBuffer, TrainStateWithBuffer], key: chex.PRNGKey):
@@ -89,7 +90,9 @@ def setup_fab_eval_function(flow: Flow, ais: SequentialMonteCarloSampler, target
 
         target_samples = target.sample(jax.random.PRNGKey(0), (config.eval_samples,))
         # Perform SMC forward pass and grab just the importance weights.
-        x0, log_q_flow = flow.sample_and_log_prob_apply(state.flow_params, key1, (config.eval_samples,))
+        x0, log_q_flow = flow.sample_and_log_prob_apply(
+            state.flow_params, key1, (config.eval_samples,)
+        )
         log_w_flow = target.log_prob(x0) - log_q_flow
         ais_point, log_w_ais, _, _ = ais.step(x0, state.smc_state, log_q_fn, target.log_prob)
         ais_samples = ais_point.x
@@ -100,11 +103,14 @@ def setup_fab_eval_function(flow: Flow, ais: SequentialMonteCarloSampler, target
 
         # Reverse process
         if config.compute_forward_metrics and (target_samples is not None):
-            fwd_ais_point, fwd_log_w_ais, _, _ = ais.reverse_step(target_samples, state.smc_state, log_q_fn,
-                                                                  target.log_prob)
+            fwd_ais_point, fwd_log_w_ais, _, _ = ais.reverse_step(
+                target_samples, state.smc_state, log_q_fn, target.log_prob
+            )
 
             eubo_ais = jnp.mean(fwd_log_w_ais)
-            fwd_log_z_ais = -(jax.nn.logsumexp(fwd_log_w_ais, axis=-1) - jnp.log(config.eval_samples))
+            fwd_log_z_ais = -(
+                jax.nn.logsumexp(fwd_log_w_ais, axis=-1) - jnp.log(config.eval_samples)
+            )
 
             return ais_samples, elbo_ais, log_z_ais, eubo_ais, fwd_log_z_ais
 
@@ -115,9 +121,7 @@ def setup_fab_eval_function(flow: Flow, ais: SequentialMonteCarloSampler, target
 
 
 def calculate_log_forward_ess(
-        log_w: chex.Array,
-        mask: Optional[chex.Array] = None,
-        log_Z: Optional[float] = None
+    log_w: chex.Array, mask: Optional[chex.Array] = None, log_Z: Optional[float] = None
 ) -> chex.Array:
     """Calculate forward ess, either using exact log_Z if it is known, or via estimating it from the samples.
     NB: log_q = p(x)/q(x) where x ~ p(x).
@@ -131,12 +135,12 @@ def calculate_log_forward_ess(
     if log_Z is None:
         log_z_inv = jax.nn.logsumexp(-log_w, b=mask) - jnp.log(jnp.sum(mask))
     else:
-        log_z_inv = - log_Z
+        log_z_inv = -log_Z
 
     # log ( Z * E_p[p(x)/q(x)] )
     log_z_times_expectation_p_of_p_div_q = jax.nn.logsumexp(log_w, b=mask) - jnp.log(jnp.sum(mask))
     # ESS (as fraction of 1) = 1/E_p[p(x)/q(x)]
     # ESS = Z / ( Z * E_p[p(x)/q(x)] )
     # Log ESS = - log Z^{-1} -  log ( Z * E_p[p(x)/q(x)] )
-    log_forward_ess = - log_z_inv - log_z_times_expectation_p_of_p_div_q
+    log_forward_ess = -log_z_inv - log_z_times_expectation_p_of_p_div_q
     return log_forward_ess

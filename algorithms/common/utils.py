@@ -3,24 +3,24 @@ import jax.numpy as jnp
 import jax
 
 
-def get_optimizer(initial_learning_rate: float,
-                  boundaries_and_scales):
+def get_optimizer(initial_learning_rate: float, boundaries_and_scales):
     """Get an optimizer possibly with learning rate schedule."""
     if boundaries_and_scales is None:
         return optax.adam(initial_learning_rate)
     else:
         schedule_fn = optax.piecewise_constant_schedule(
-            initial_learning_rate,
-            boundaries_and_scales[0])
-        opt = optax.chain(optax.scale_by_adam(),
-                          optax.scale_by_schedule(schedule_fn), optax.scale(-1.))
+            initial_learning_rate, boundaries_and_scales[0]
+        )
+        opt = optax.chain(
+            optax.scale_by_adam(), optax.scale_by_schedule(schedule_fn), optax.scale(-1.0)
+        )
         return opt
 
 
 def avg_list_entries(list, num):
     assert len(list) >= num
     print(range(0, len(list) - num))
-    return [sum(list[i:i + num]) / float(num) for i in range(0, len(list) - num + 1)]
+    return [sum(list[i : i + num]) / float(num) for i in range(0, len(list) - num + 1)]
 
 
 def reverse_transition_params(transition_params):

@@ -24,9 +24,7 @@ def adam(step_size, b1=0.9, b2=0.999, eps=1e-8):
             if "gamma" in trainable:
                 x_train["gamma"] = np.clip(x_train["gamma"], 0.001, None)
             if "mgridref_y" in trainable:
-                x_train["mgridref_y"] = (
-                    jax.nn.relu(x_train["mgridref_y"] - 0.001) + 0.001
-                )
+                x_train["mgridref_y"] = jax.nn.relu(x_train["mgridref_y"] - 0.001) + 0.001
             return ravel_pytree((x_train, x_notrain))[0]
 
         x, m, v = state
@@ -43,5 +41,3 @@ def adam(step_size, b1=0.9, b2=0.999, eps=1e-8):
         return x
 
     return init, update, get_params
-
-

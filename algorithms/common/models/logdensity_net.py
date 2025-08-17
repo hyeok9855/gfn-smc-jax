@@ -6,7 +6,9 @@ class TimeEncoder(nn.Module):
     num_hid: int = 2
 
     def setup(self):
-        self.timestep_phase = self.param('timestep_phase', nn.initializers.zeros_init(), (1, self.num_hid))
+        self.timestep_phase = self.param(
+            "timestep_phase", nn.initializers.zeros_init(), (1, self.num_hid)
+        )
         self.timestep_coeff = jnp.linspace(start=0.1, stop=100, num=self.num_hid)[None]
 
         self.mlp = [
@@ -16,12 +18,8 @@ class TimeEncoder(nn.Module):
         ]
 
     def get_fourier_features(self, timesteps):
-        sin_embed_cond = jnp.sin(
-            (self.timestep_coeff * timesteps) + self.timestep_phase
-        )
-        cos_embed_cond = jnp.cos(
-            (self.timestep_coeff * timesteps) + self.timestep_phase
-        )
+        sin_embed_cond = jnp.sin((self.timestep_coeff * timesteps) + self.timestep_phase)
+        cos_embed_cond = jnp.cos((self.timestep_coeff * timesteps) + self.timestep_phase)
         return jnp.concatenate([sin_embed_cond, cos_embed_cond], axis=-1)
 
     def __call__(self, time_array_emb):
@@ -38,35 +36,48 @@ class LogDensityNet(nn.Module):
     inner_clip: float = 1e2
 
     weight_init: float = 1e-8
-    bias_init: float = 0.
+    bias_init: float = 0.0
 
     def setup(self):
-        self.timestep_phase = self.param('timestep_phase', nn.initializers.zeros_init(), (1, self.num_hid))
+        self.timestep_phase = self.param(
+            "timestep_phase", nn.initializers.zeros_init(), (1, self.num_hid)
+        )
         self.timestep_coeff = jnp.linspace(start=0.1, stop=100, num=self.num_hid)[None]
 
-        self.time_coder_state = nn.Sequential([
-            nn.Dense(self.num_hid),
-            nn.gelu,
-            nn.Dense(self.num_hid),
-        ])
+        self.time_coder_state = nn.Sequential(
+            [
+                nn.Dense(self.num_hid),
+                nn.gelu,
+                nn.Dense(self.num_hid),
+            ]
+        )
 
-        self.time_coder_grad = nn.Sequential([nn.Dense(self.num_hid)] + [nn.Sequential(
-            [nn.gelu, nn.Dense(self.num_hid)]) for _ in range(self.num_layers)] + [
-                                                 nn.Dense(1, kernel_init=nn.initializers.constant(self.weight_init),
-                                                          bias_init=nn.initializers.constant(self.bias_init))])
+        self.time_coder_grad = nn.Sequential(
+            [nn.Dense(self.num_hid)]
+            + [nn.Sequential([nn.gelu, nn.Dense(self.num_hid)]) for _ in range(self.num_layers)]
+            + [
+                nn.Dense(
+                    1,
+                    kernel_init=nn.initializers.constant(self.weight_init),
+                    bias_init=nn.initializers.constant(self.bias_init),
+                )
+            ]
+        )
 
-        self.state_time_net = nn.Sequential([nn.Sequential(
-            [nn.Dense(self.num_hid), nn.gelu]) for _ in range(self.num_layers)] + [
-                                                nn.Dense(1, kernel_init=nn.initializers.constant(1e-8),
-                                                         bias_init=nn.initializers.zeros_init())])
+        self.state_time_net = nn.Sequential(
+            [nn.Sequential([nn.Dense(self.num_hid), nn.gelu]) for _ in range(self.num_layers)]
+            + [
+                nn.Dense(
+                    1,
+                    kernel_init=nn.initializers.constant(1e-8),
+                    bias_init=nn.initializers.zeros_init(),
+                )
+            ]
+        )
 
     def get_fourier_features(self, timesteps):
-        sin_embed_cond = jnp.sin(
-            (self.timestep_coeff * timesteps) + self.timestep_phase
-        )
-        cos_embed_cond = jnp.cos(
-            (self.timestep_coeff * timesteps) + self.timestep_phase
-        )
+        sin_embed_cond = jnp.sin((self.timestep_coeff * timesteps) + self.timestep_phase)
+        cos_embed_cond = jnp.cos((self.timestep_coeff * timesteps) + self.timestep_phase)
         return jnp.concatenate([sin_embed_cond, cos_embed_cond], axis=-1)
 
     def __call__(self, input_array, time_array, log_density):

@@ -15,11 +15,18 @@ import matplotlib
 
 # matplotlib.use('agg')
 
+
 class GMM40(Target):
     def __init__(
-            self,
-            dim: int = 2, num_components: int = 40, loc_scaling: float = 40,
-            scale_scaling: float = 1.0, seed: int = 0, sample_bounds=None, can_sample=True, log_Z=0
+        self,
+        dim: int = 2,
+        num_components: int = 40,
+        loc_scaling: float = 40,
+        scale_scaling: float = 1.0,
+        seed: int = 0,
+        sample_bounds=None,
+        can_sample=True,
+        log_Z=0,
     ) -> None:
         super().__init__(dim, log_Z, can_sample)
 
@@ -28,7 +35,10 @@ class GMM40(Target):
 
         key = jax.random.PRNGKey(seed)
         logits = jnp.ones(num_components)
-        mean = jax.random.uniform(shape=(num_components, dim), key=key, minval=-1.0, maxval=1.0) * loc_scaling
+        mean = (
+            jax.random.uniform(shape=(num_components, dim), key=key, minval=-1.0, maxval=1.0)
+            * loc_scaling
+        )
         scale = jnp.ones(shape=(num_components, dim)) * scale_scaling
 
         mixture_dist = distrax.Categorical(logits=logits)
@@ -66,7 +76,7 @@ class GMM40(Target):
         entropy = -jnp.sum(mode_dist * (jnp.log(mode_dist) / jnp.log(self.n_mixes)))
         return entropy
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         plt.close()
         fig = plt.figure()
         ax = fig.add_subplot()
@@ -90,7 +100,7 @@ class GMM40(Target):
         # tikzplotlib.save(os.path.join(project_path('./figures/'), f"gmm40.tex"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     gmm = GMM40()
     samples = gmm.sample(jax.random.PRNGKey(0), (2000,))
     gmm.log_prob(samples)

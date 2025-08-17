@@ -1,4 +1,5 @@
-"""Code builds on https://github.com/google-deepmind/annealed_flow_transport """
+"""Code builds on https://github.com/google-deepmind/annealed_flow_transport"""
+
 from typing import Any, Callable, Mapping, NamedTuple, Tuple
 
 import chex
@@ -15,16 +16,14 @@ SampleShape = Any
 LogDensityByStep = Any
 RandomKey = Array
 AcceptanceTuple = Tuple[Array, Array, Array]
-MarkovKernelApply = Callable[[int, RandomKey, Samples],
-Tuple[Samples, AcceptanceTuple]]
+MarkovKernelApply = Callable[[int, RandomKey, Samples], Tuple[Samples, AcceptanceTuple]]
 OptState = optax.OptState
 UpdateFn = optax.TransformUpdateFn
 FlowParams = Any
 FlowApply = Callable[[FlowParams, Samples], Tuple[Samples, Array]]
 LogDensityNoStep = Callable[[Samples], Array]
 InitialSampler = Callable[[RandomKey, int, Tuple[int]], Samples]
-FreeEnergyAndGrad = Callable[[FlowParams, Array, Array, int], Tuple[Array,
-Array]]
+FreeEnergyAndGrad = Callable[[FlowParams, Array, Array, int], Tuple[Array, Array]]
 FreeEnergyEval = Callable[[FlowParams, Array, Array, int], Array]
 MNIST_IMAGE_SHAPE = (28, 28, 1)
 

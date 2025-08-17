@@ -1,4 +1,5 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
+
 """Extension of distrax that allows for flow to pass forward extra information."""
 from typing import Tuple, Union, Callable, Optional, NamedTuple
 
@@ -55,16 +56,34 @@ class ChainWithExtra(distrax.Chain, BijectorWithExtra):
         info_aggregator = {}
         x, log_det, extra = self._bijectors[-1].forward_and_log_det_with_extra(x)
         losses.append(extra.aux_loss)
-        info.update({f"lay_{n_layers}\{n_layers}" + key: value for key, value in extra.aux_info.items()})
-        info_aggregator.update({f"lay_{n_layers}\{n_layers}" + key: value for key, value in extra.info_aggregator.items()})
+        info.update(
+            {f"lay_{n_layers}\{n_layers}" + key: value for key, value in extra.aux_info.items()}
+        )
+        info_aggregator.update(
+            {
+                f"lay_{n_layers}\{n_layers}" + key: value
+                for key, value in extra.info_aggregator.items()
+            }
+        )
         for i, bijector in enumerate(reversed(self._bijectors[:-1])):
             x, ld, extra = bijector.forward_and_log_det_with_extra(x)
             log_det += ld
-            info.update({f"lay_{n_layers - 1 - i}\{n_layers}" + key: value for key, value in extra.aux_info.items()})
-            info_aggregator.update({f"lay_{n_layers - 1 - i}\{n_layers}" + key: value for key, value in
-                                    extra.info_aggregator.items()})
+            info.update(
+                {
+                    f"lay_{n_layers - 1 - i}\{n_layers}" + key: value
+                    for key, value in extra.aux_info.items()
+                }
+            )
+            info_aggregator.update(
+                {
+                    f"lay_{n_layers - 1 - i}\{n_layers}" + key: value
+                    for key, value in extra.info_aggregator.items()
+                }
+            )
             losses.append(extra.aux_loss)
-        extras = Extra(aux_loss=jnp.squeeze(jnp.stack(losses)), aux_info=info, info_aggregator=info_aggregator)
+        extras = Extra(
+            aux_loss=jnp.squeeze(jnp.stack(losses)), aux_info=info, info_aggregator=info_aggregator
+        )
         return x, log_det, extras
 
     def inverse_and_log_det_with_extra(self, y: Array) -> Tuple[Array, Array, Extra]:
@@ -76,20 +95,30 @@ class ChainWithExtra(distrax.Chain, BijectorWithExtra):
         y, log_det, extra = self._bijectors[0].inverse_and_log_det_with_extra(y)
         info.update({f"lay_{1}\{n_layers}" + key: value for key, value in extra.aux_info.items()})
         info_aggregator.update(
-            {f"lay_{1}\{n_layers}" + key: value for key, value in extra.info_aggregator.items()})
+            {f"lay_{1}\{n_layers}" + key: value for key, value in extra.info_aggregator.items()}
+        )
         losses.append(extra.aux_loss)
         for i, bijector in enumerate(self._bijectors[1:]):
             y, ld, extra = bijector.inverse_and_log_det_with_extra(y)
             log_det += ld
-            info.update({f"lay_{2 + i}\{n_layers}" + key: value for key, value in extra.aux_info.items()})
-            info_aggregator.update({f"lay_{2 + i}\{n_layers}" + key: value for key, value in
-                                    extra.info_aggregator.items()})
+            info.update(
+                {f"lay_{2 + i}\{n_layers}" + key: value for key, value in extra.aux_info.items()}
+            )
+            info_aggregator.update(
+                {
+                    f"lay_{2 + i}\{n_layers}" + key: value
+                    for key, value in extra.info_aggregator.items()
+                }
+            )
             losses.append(extra.aux_loss)
-        extras = Extra(aux_loss=jnp.squeeze(jnp.stack(losses)), aux_info=info, info_aggregator=info_aggregator)
+        extras = Extra(
+            aux_loss=jnp.squeeze(jnp.stack(losses)), aux_info=info, info_aggregator=info_aggregator
+        )
         return y, log_det, extras
 
 
 from distrax._src.utils import math
+
 
 class BlockWithExtra(distrax.Block, BijectorWithExtra):
     def __init__(self, bijector: BijectorWithExtra, ndims: int):
@@ -113,33 +142,40 @@ from distrax._src.bijectors.split_coupling import BijectorParams
 
 class SplitCouplingWithExtra(distrax.SplitCoupling, BijectorWithExtra):
     # TODO: make more clear that conditional can optionall take in whether or not we want info from it.
-    def __init__(self,
-                 split_index: int,
-                 event_ndims: int,
-                 conditioner: Callable[[Array, Optional[bool]], BijectorParams],
-                 bijector: Callable[[BijectorParams], Union[BijectorWithExtra, distrax.Bijector]],
-                 swap: bool = False,
-                 split_axis: int = -1):
-        super().__init__(split_index=split_index,
-                         event_ndims=event_ndims,
-                         conditioner=conditioner,
-                         bijector=bijector,
-                         swap=swap, split_axis=split_axis)
+    def __init__(
+        self,
+        split_index: int,
+        event_ndims: int,
+        conditioner: Callable[[Array, Optional[bool]], BijectorParams],
+        bijector: Callable[[BijectorParams], Union[BijectorWithExtra, distrax.Bijector]],
+        swap: bool = False,
+        split_axis: int = -1,
+    ):
+        super().__init__(
+            split_index=split_index,
+            event_ndims=event_ndims,
+            conditioner=conditioner,
+            bijector=bijector,
+            swap=swap,
+            split_axis=split_axis,
+        )
 
     def _inner_bijector(self, params: BijectorParams) -> Union[BijectorWithExtra, distrax.Bijector]:
         """Returns an inner bijector for the passed params."""
         bijector = self._bijector(params)
         if bijector.event_ndims_in != bijector.event_ndims_out:
             raise ValueError(
-                f'The inner bijector must have `event_ndims_in==event_ndims_out`. '
-                f'Instead, it has `event_ndims_in=={bijector.event_ndims_in}` and '
-                f'`event_ndims_out=={bijector.event_ndims_out}`.')
+                f"The inner bijector must have `event_ndims_in==event_ndims_out`. "
+                f"Instead, it has `event_ndims_in=={bijector.event_ndims_in}` and "
+                f"`event_ndims_out=={bijector.event_ndims_out}`."
+            )
         extra_ndims = self.event_ndims_in - bijector.event_ndims_in
         if extra_ndims < 0:
             raise ValueError(
-                f'The inner bijector can\'t have more event dimensions than the '
-                f'coupling bijector. Got {bijector.event_ndims_in} for the inner '
-                f'bijector and {self.event_ndims_in} for the coupling bijector.')
+                f"The inner bijector can't have more event dimensions than the "
+                f"coupling bijector. Got {bijector.event_ndims_in} for the inner "
+                f"bijector and {self.event_ndims_in} for the coupling bijector."
+            )
         elif extra_ndims > 0:
             if isinstance(bijector, BijectorWithExtra):
                 bijector = BlockWithExtra(bijector, extra_ndims)

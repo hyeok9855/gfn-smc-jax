@@ -37,15 +37,17 @@ def gmmvi_trainer(cfg, target):
             logger = eval_fn(*gmmvi.eval(subkey, state, target_samples))
             logger["stats/step"].append(step)
             logger["stats/wallclock"].append(timer)
-            logger['stats/num_samples'] = [state.sample_db_state.num_samples_written]
-            logger['stats/num_components'] = [state.model_state.gmm_state.num_components]
+            logger["stats/num_samples"] = [state.sample_db_state.num_samples_written]
+            logger["stats/num_components"] = [state.model_state.gmm_state.num_components]
 
             print_results(step, logger, cfg)
 
             if cfg.use_wandb:
                 wandb.log(extract_last_entry(logger))
 
-            print(f"{step}/{cfg.algorithm.iters}: "
-                  f"The model now has {state.model_state.gmm_state.num_components} components ")
+            print(
+                f"{step}/{cfg.algorithm.iters}: "
+                f"The model now has {state.model_state.gmm_state.num_components} components "
+            )
 
     return logger

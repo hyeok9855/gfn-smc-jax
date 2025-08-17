@@ -17,18 +17,28 @@ class BreastCancer(Target):
         self.data = jnp.array(X, dtype=jnp.float32)
         self.labels = data[:, 1]
         self.num_dimensions = self.data.shape[1]
-        self._prior_std_const = jnp.array(10., dtype=jnp.float32)
-        self.prior_mean_const = jnp.array(0., dtype=jnp.float32)
+        self._prior_std_const = jnp.array(10.0, dtype=jnp.float32)
+        self.prior_mean_const = jnp.array(0.0, dtype=jnp.float32)
         self.labels = jnp.array(jnp.expand_dims(self.labels.astype(jnp.float32), 1))
-        self.const_term = jnp.array(0.5 * jnp.log(2. * jnp.pi), dtype=jnp.float32)
+        self.const_term = jnp.array(0.5 * jnp.log(2.0 * jnp.pi), dtype=jnp.float32)
 
     def log_prob(self, x: chex.Array) -> chex.Array:
         def _log_prob(x: chex.Array):
             features = -jnp.matmul(self.data, x.transpose())
-            log_likelihood = jnp.sum(jnp.where(self.labels == 1, jax.nn.log_sigmoid(features),
-                                               jax.nn.log_sigmoid(features) - features), axis=0)
-            log_prior = jnp.sum(-jnp.log(self._prior_std_const) - self.const_term - 0.5 * jnp.square(
-                (x - self.prior_mean_const) / self._prior_std_const), axis=1)
+            log_likelihood = jnp.sum(
+                jnp.where(
+                    self.labels == 1,
+                    jax.nn.log_sigmoid(features),
+                    jax.nn.log_sigmoid(features) - features,
+                ),
+                axis=0,
+            )
+            log_prior = jnp.sum(
+                -jnp.log(self._prior_std_const)
+                - self.const_term
+                - 0.5 * jnp.square((x - self.prior_mean_const) / self._prior_std_const),
+                axis=1,
+            )
             log_posterior = log_likelihood  # + log_prior
             return log_posterior
 
@@ -43,14 +53,16 @@ class BreastCancer(Target):
 
         return log_probs
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         return {}
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
-        data = np.load(project_path('targets/data/breastcancer_gt_with_lns_10k.npz'))
-        ground_truth_samples = data['groundtruth']
+        data = np.load(project_path("targets/data/breastcancer_gt_with_lns_10k.npz"))
+        ground_truth_samples = data["groundtruth"]
 
-        indices = jax.random.choice(seed, ground_truth_samples.shape[0], shape=sample_shape, replace=False)
+        indices = jax.random.choice(
+            seed, ground_truth_samples.shape[0], shape=sample_shape, replace=False
+        )
         # Use the generated indices to select the subset
         return ground_truth_samples[indices]
 

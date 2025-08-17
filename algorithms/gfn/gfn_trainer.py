@@ -24,8 +24,9 @@ def gfn_trainer(cfg, target):
     alg_cfg = cfg.algorithm
 
     # Define initial and target density
-    normal_log_prob = lambda x, sigma: distrax.MultivariateNormalDiag(jnp.zeros(dim),
-                                                                      jnp.ones(dim) * sigma).log_prob(x)
+    normal_log_prob = lambda x, sigma: distrax.MultivariateNormalDiag(
+        jnp.zeros(dim), jnp.ones(dim) * sigma
+    ).log_prob(x)
     aux_tuple = (dim, normal_log_prob)
     target_log_prob = target.log_prob
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
@@ -34,19 +35,25 @@ def gfn_trainer(cfg, target):
     key, key_gen = jax.random.split(key_gen)
     model_state = init_model(key, dim, alg_cfg)
 
-    if alg_cfg.loss == 'elbo':
+    if alg_cfg.loss == "elbo":
         loss_fn = neg_elbo
-    elif alg_cfg.loss == 'lv':
+    elif alg_cfg.loss == "lv":
         loss_fn = log_variance
-    elif alg_cfg.loss == 'tb':
+    elif alg_cfg.loss == "tb":
         loss_fn = trajectory_balance
     else:
-        return ValueError(f'No loss function named {alg_cfg.loss}.')
+        return ValueError(f"No loss function named {alg_cfg.loss}.")
 
     loss = jax.jit(jax.grad(loss_fn, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
-    rnd_short = partial(rnd, batch_size=cfg.eval_samples, aux_tuple=aux_tuple,
-                        target=target, num_steps=cfg.algorithm.num_steps,
-                        noise_schedule=cfg.algorithm.noise_schedule, stop_grad=True)
+    rnd_short = partial(
+        rnd,
+        batch_size=cfg.eval_samples,
+        aux_tuple=aux_tuple,
+        target=target,
+        num_steps=cfg.algorithm.num_steps,
+        noise_schedule=cfg.algorithm.noise_schedule,
+        stop_grad=True,
+    )
 
     eval_fn, logger = get_eval_fn(rnd_short, target, target_samples, cfg)
 
@@ -55,8 +62,16 @@ def gfn_trainer(cfg, target):
     for step in range(alg_cfg.iters):
         key, key_gen = jax.random.split(key_gen)
         iter_time = time()
-        grads, _ = loss(key, model_state, model_state.params, alg_cfg.batch_size,
-                        aux_tuple, target, alg_cfg.num_steps, alg_cfg.noise_schedule)
+        grads, _ = loss(
+            key,
+            model_state,
+            model_state.params,
+            alg_cfg.batch_size,
+            aux_tuple,
+            target,
+            alg_cfg.num_steps,
+            alg_cfg.noise_schedule,
+        )
         timer += time() - iter_time
 
         model_state = model_state.apply_gradients(grads=grads)

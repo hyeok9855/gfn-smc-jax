@@ -15,7 +15,7 @@ from utils.path_utils import project_path
 
 
 class StudentTMixtureModel(Target):
-    def __init__(self, num_components, dim, log_Z=0., can_sample=True, sample_bounds=None) -> None:
+    def __init__(self, num_components, dim, log_Z=0.0, can_sample=True, sample_bounds=None) -> None:
         # parameters
         super().__init__(dim, log_Z, can_sample)
         seed = 0
@@ -31,7 +31,9 @@ class StudentTMixtureModel(Target):
         seed = jax.random.PRNGKey(seed)
 
         # set mixture components
-        locs = jax.random.uniform(seed, minval=min_mean_val, maxval=max_mean_val, shape=(num_components, dim))
+        locs = jax.random.uniform(
+            seed, minval=min_mean_val, maxval=max_mean_val, shape=(num_components, dim)
+        )
         dofs = jnp.ones((num_components, dim)) * degree_of_freedoms
         scales = jnp.ones((num_components, dim))
         component_dist = dist.Independent(dist.StudentT(df=dofs, loc=locs, scale=scales), 1)
@@ -44,8 +46,11 @@ class StudentTMixtureModel(Target):
         if uniform_mws:
             mixture_weights = dist.Categorical(logits=jnp.ones(num_components) / num_components)
         else:
-            mixture_weights = dist.Categorical(logits=dist.Uniform(
-                low=min_val_mixture_weight, high=max_val_mixture_weight).sample(seed, sample_shape=(num_components,)))
+            mixture_weights = dist.Categorical(
+                logits=dist.Uniform(low=min_val_mixture_weight, high=max_val_mixture_weight).sample(
+                    seed, sample_shape=(num_components,)
+                )
+            )
 
         self.mixture_distribution = dist.MixtureSameFamily(mixture_weights, component_dist)
 
@@ -72,13 +77,14 @@ class StudentTMixtureModel(Target):
         entropy = -jnp.sum(mode_dist * (jnp.log(mode_dist) / jnp.log(self.num_components)))
         return entropy
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         boarder = [-15, 15]
         if self.dim == 2:
             fig = plt.figure()
             ax = fig.add_subplot()
-            x, y = jnp.meshgrid(jnp.linspace(boarder[0], boarder[1], 100),
-                                jnp.linspace(boarder[0], boarder[1], 100))
+            x, y = jnp.meshgrid(
+                jnp.linspace(boarder[0], boarder[1], 100), jnp.linspace(boarder[0], boarder[1], 100)
+            )
             grid = jnp.c_[x.ravel(), y.ravel()]
             pdf_values = jax.vmap(jnp.exp)(self.log_prob(grid))
             pdf_values = jnp.reshape(pdf_values, x.shape)
@@ -86,7 +92,7 @@ class StudentTMixtureModel(Target):
             ax.contourf(x, y, pdf_values, levels=50)
 
             if samples is not None:
-                plt.scatter(samples[:300, 0], samples[:300, 1], c='r', alpha=0.5, marker='x')
+                plt.scatter(samples[:300, 0], samples[:300, 1], c="r", alpha=0.5, marker="x")
 
             # plt.xlabel('X')
             # plt.ylabel('Y')

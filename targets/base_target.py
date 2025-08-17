@@ -10,11 +10,12 @@ LogProbFn = Callable[[chex.Array], chex.Array]
 class Target(abc.ABC):
     """Abstraction of target distribution that allows our training and evaluation scripts to be generic."""
 
-    def __init__(self,
-                 dim: int,
-                 log_Z: Optional[float],
-                 can_sample: bool,
-                 ):
+    def __init__(
+        self,
+        dim: int,
+        log_Z: Optional[float],
+        can_sample: bool,
+    ):
         self._dim = dim
         self._log_Z = log_Z
         self._can_sample = can_sample
@@ -42,5 +43,7 @@ class Target(abc.ABC):
         """(Possibly unnormalized) target probability density."""
 
     @abc.abstractmethod
-    def visualise(self, samples: chex.Array, axes: List[plt.Axes] = None, show: bool = False, prefix: str = '') -> dict:
+    def visualise(
+        self, samples: chex.Array, axes: List[plt.Axes] = None, show: bool = False, prefix: str = ""
+    ) -> dict:
         """Visualise samples from the model."""

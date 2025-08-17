@@ -19,7 +19,7 @@ from utils.path_utils import project_path
 
 
 class GaussianMixtureModel(Target):
-    def __init__(self, num_components, dim, log_Z=0., can_sample=True, sample_bounds=None) -> None:
+    def __init__(self, num_components, dim, log_Z=0.0, can_sample=True, sample_bounds=None) -> None:
         # parameters
         super().__init__(dim, log_Z, can_sample)
 
@@ -35,13 +35,15 @@ class GaussianMixtureModel(Target):
         seed = jax.random.PRNGKey(0)
 
         # set mixture components
-        locs = jax.random.uniform(seed, minval=min_mean_val, maxval=max_mean_val, shape=(num_components, dim))
+        locs = jax.random.uniform(
+            seed, minval=min_mean_val, maxval=max_mean_val, shape=(num_components, dim)
+        )
         covariances = []
         for _ in range(num_components):
             seed, subkey = random.split(seed)
 
             # Set the random seed for Scipy
-            seed_value = random.randint(key=subkey, shape=(), minval=0, maxval=2 ** 30)
+            seed_value = random.randint(key=subkey, shape=(), minval=0, maxval=2**30)
             np.random.seed(seed_value)
 
             cov_matrix = wishart.rvs(df=degree_of_freedom_wishart, scale=jnp.eye(dim))
@@ -54,11 +56,15 @@ class GaussianMixtureModel(Target):
         if uniform_mws:
             mixture_weights = distrax.Categorical(logits=jnp.ones(num_components) / num_components)
         else:
-            mixture_weights = distrax.Categorical(logits=dist.Uniform(
-                low=min_val_mixture_weight, high=max_val_mixture_weight).sample(seed, sample_shape=(num_components,)))
+            mixture_weights = distrax.Categorical(
+                logits=dist.Uniform(low=min_val_mixture_weight, high=max_val_mixture_weight).sample(
+                    seed, sample_shape=(num_components,)
+                )
+            )
 
-        self.mixture_distribution = distrax.MixtureSameFamily(mixture_distribution=mixture_weights,
-                                                              components_distribution=component_dist)
+        self.mixture_distribution = distrax.MixtureSameFamily(
+            mixture_distribution=mixture_weights, components_distribution=component_dist
+        )
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         return self.mixture_distribution.sample(seed=seed, sample_shape=sample_shape)
@@ -85,7 +91,7 @@ class GaussianMixtureModel(Target):
         entropy = -jnp.sum(mode_dist * (jnp.log(mode_dist) / jnp.log(self.num_components)))
         return entropy
 
-    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix='') -> dict:
+    def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         plt.close()
 
         boarder = [-15, 15]
@@ -95,14 +101,15 @@ class GaussianMixtureModel(Target):
 
         if self.dim == 2:
 
-            x, y = jnp.meshgrid(jnp.linspace(boarder[0], boarder[1], 100),
-                                jnp.linspace(boarder[0], boarder[1], 100))
+            x, y = jnp.meshgrid(
+                jnp.linspace(boarder[0], boarder[1], 100), jnp.linspace(boarder[0], boarder[1], 100)
+            )
             grid = jnp.c_[x.ravel(), y.ravel()]
             pdf_values = jax.vmap(jnp.exp)(self.log_prob(grid))
             pdf_values = jnp.reshape(pdf_values, x.shape)
             ax.contourf(x, y, pdf_values, levels=20)  # , cmap='viridis')
             if samples is not None:
-                plt.scatter(samples[:300, 0], samples[:300, 1], c='r', alpha=0.5, marker='x')
+                plt.scatter(samples[:300, 0], samples[:300, 1], c="r", alpha=0.5, marker="x")
             # plt.xlabel('X')
             # plt.ylabel('Y')
             # plt.colorbar()
@@ -122,8 +129,8 @@ class GaussianMixtureModel(Target):
 
         else:
             target_samples = self.sample(jax.random.PRNGKey(0), (500,))
-            ax.scatter(target_samples[:, 0], target_samples[:, 1], c='b', label='target')
-            ax.scatter(samples[:, 0], samples[:, 1], c='r', label='model')
+            ax.scatter(target_samples[:, 0], target_samples[:, 1], c="b", label="target")
+            ax.scatter(samples[:, 0], samples[:, 1], c="r", label="model")
             plt.legend()
 
         wb = {"figures/vis": [wandb.Image(fig)]}

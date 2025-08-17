@@ -15,18 +15,29 @@ def log_prob_kernel(x, mean, scale):
     return dist.log_prob(x)
 
 
-def per_sample_rnd(seed, model_state, params, aux_tuple, target, num_steps, noise_schedule,
-                   stop_grad=False, prior_to_target=True):
+def per_sample_rnd(
+    seed,
+    model_state,
+    params,
+    aux_tuple,
+    target,
+    num_steps,
+    noise_schedule,
+    stop_grad=False,
+    prior_to_target=True,
+):
     prior_sampler, prior_log_prob, get_betas, get_diff_coefficient, get_friction = aux_tuple
     target_log_prob = target.log_prob
 
     def langevin_score_fn(x, beta, params, initial_log_prob, target_log_prob):
-        return (beta * target_log_prob(x) + (1 - beta) * initial_log_prob(params, x))
+        return beta * target_log_prob(x) + (1 - beta) * initial_log_prob(params, x)
 
     deltas = noise_schedule
     betas = get_betas(params)
 
-    langevin_score = partial(langevin_score_fn, initial_log_prob=prior_log_prob, target_log_prob=target_log_prob)
+    langevin_score = partial(
+        langevin_score_fn, initial_log_prob=prior_log_prob, target_log_prob=target_log_prob
+    )
 
     def simulate_prior_to_target(state, per_step_input):
         """
@@ -126,20 +137,26 @@ def per_sample_rnd(seed, model_state, params, aux_tuple, target, num_steps, nois
         init_x = jnp.squeeze(prior_sampler(params, key, 1))
         key, key_gen = jax.random.split(key_gen)
         init_rho = jax.random.normal(key, shape=(init_x.shape[0],))  # (dim,)
-        aux = (init_x, init_rho, 0., key)
+        aux = (init_x, init_rho, 0.0, key)
         aux, per_step_output = jax.lax.scan(simulate_prior_to_target, aux, jnp.arange(0, num_steps))
         final_x, final_rho, log_ratio, _ = aux
         sample_terminal_cost = prior_log_prob(params, init_x) - target_log_prob(final_x)
-        momentum_terminal_cost = log_prob_kernel(init_rho, jnp.zeros(init_x.shape[0]), 1.0) - log_prob_kernel(final_rho, jnp.zeros(init_x.shape[0]), 1.0)
+        momentum_terminal_cost = log_prob_kernel(
+            init_rho, jnp.zeros(init_x.shape[0]), 1.0
+        ) - log_prob_kernel(final_rho, jnp.zeros(init_x.shape[0]), 1.0)
     else:
         init_x = jnp.squeeze(target.sample(key, (1,)))
         key, key_gen = jax.random.split(key_gen)
         init_rho = jax.random.normal(key, shape=(init_x.shape[0],))  # (dim,)
-        aux = (init_x, init_rho, 0., key)
-        aux, per_step_output = jax.lax.scan(simulate_target_to_prior, aux, jnp.arange(0, num_steps)[::-1])
+        aux = (init_x, init_rho, 0.0, key)
+        aux, per_step_output = jax.lax.scan(
+            simulate_target_to_prior, aux, jnp.arange(0, num_steps)[::-1]
+        )
         final_x, final_rho, log_ratio, _ = aux
         sample_terminal_cost = prior_log_prob(params, final_x) - target_log_prob(init_x)
-        momentum_terminal_cost = log_prob_kernel(final_rho, jnp.zeros(init_x.shape[0]), 1.0) - log_prob_kernel(init_rho, jnp.zeros(init_x.shape[0]), 1.0)
+        momentum_terminal_cost = log_prob_kernel(
+            final_rho, jnp.zeros(init_x.shape[0]), 1.0
+        ) - log_prob_kernel(init_rho, jnp.zeros(init_x.shape[0]), 1.0)
 
     terminal_cost = sample_terminal_cost + momentum_terminal_cost
 
@@ -149,22 +166,58 @@ def per_sample_rnd(seed, model_state, params, aux_tuple, target, num_steps, nois
     return final_x, running_cost, stochastic_costs, terminal_cost, x_t
 
 
-def rnd(key, model_state, params, batch_size, aux_tuple, target, num_steps, noise_schedule,
-        stop_grad=False, prior_to_target=True):
+def rnd(
+    key,
+    model_state,
+    params,
+    batch_size,
+    aux_tuple,
+    target,
+    num_steps,
+    noise_schedule,
+    stop_grad=False,
+    prior_to_target=True,
+):
     seeds = jax.random.split(key, num=batch_size)
-    x_0, running_costs, stochastic_costs, terminal_costs, x_t = jax.vmap(per_sample_rnd,
-                                                                         in_axes=(
-                                                                             0, None, None, None, None, None, None,
-                                                                             None, None)) \
-        (seeds, model_state, params, aux_tuple, target, num_steps, noise_schedule, stop_grad, prior_to_target)
+    x_0, running_costs, stochastic_costs, terminal_costs, x_t = jax.vmap(
+        per_sample_rnd, in_axes=(0, None, None, None, None, None, None, None, None)
+    )(
+        seeds,
+        model_state,
+        params,
+        aux_tuple,
+        target,
+        num_steps,
+        noise_schedule,
+        stop_grad,
+        prior_to_target,
+    )
 
     return x_0, running_costs, stochastic_costs, terminal_costs
 
 
-def neg_elbo(key, model_state, params, batch_size, aux_tuple, target, num_steps, noise_schedule,
-             stop_grad=False):
-    aux = rnd(key, model_state, params, batch_size, aux_tuple, target, num_steps, noise_schedule,
-              stop_grad)
+def neg_elbo(
+    key,
+    model_state,
+    params,
+    batch_size,
+    aux_tuple,
+    target,
+    num_steps,
+    noise_schedule,
+    stop_grad=False,
+):
+    aux = rnd(
+        key,
+        model_state,
+        params,
+        batch_size,
+        aux_tuple,
+        target,
+        num_steps,
+        noise_schedule,
+        stop_grad,
+    )
     samples, running_costs, stochastic_costs, terminal_costs = aux
     neg_elbo = running_costs + terminal_costs
     return jnp.mean(neg_elbo), (neg_elbo, samples)
