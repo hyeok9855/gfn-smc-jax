@@ -2,7 +2,7 @@
 name: gbs
 step_size: ${target.gbs.step_size}
 batch_size: ${target.all.batch_size}
-iters: 1
+iters: 40000
 init_std: ${target.gbs.initial_scale}
 num_steps: 128
 loss: "elbo"  # Currently only supports 'elbo'
