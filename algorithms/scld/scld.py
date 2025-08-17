@@ -673,7 +673,8 @@ def scld_trainer(cfg, target):
 
         print(f"ELBO before training: {elbo_est}")
         print(f"lnZ before training: {lnz_est}")
-        wandb.log({"ELBO_no_training": elbo_est, "lnZ_no_training": lnz_est})
+        if cfg.use_wandb:
+            wandb.log({"ELBO_no_training": elbo_est, "lnZ_no_training": lnz_est})
 
         buffer_state = buffer.init(inital_subtrajs, log_rnds)
 

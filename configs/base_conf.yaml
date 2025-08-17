@@ -20,5 +20,5 @@ compute_forward_metrics: True
 use_wandb: False
 verbose: True  # Intermediate results are printed if True
 visualize_samples: True  # Samples are visualized if target density permitts
-save_samples: True  # Save samples with highest ELBO
+save_samples: False  # Save samples with highest ELBO
 save_model: False  # Checkpointing is currently not implemented

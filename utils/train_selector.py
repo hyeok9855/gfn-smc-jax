@@ -19,6 +19,11 @@ def get_train_fn(alg_name):
 
         return smc_trainer
 
+    elif alg_name == "smc_advanced":
+        from algorithms.smc.smc_advanced import smc_advanced
+
+        return smc_advanced
+
     elif alg_name == "aft":
         from algorithms.aft.aft_trainer import aft_trainer
 
@@ -53,6 +58,11 @@ def get_train_fn(alg_name):
         from algorithms.cmcd.cmcd_trainer import cmcd_trainer
 
         return cmcd_trainer
+
+    elif alg_name == "scld":
+        from algorithms.scld.scld import scld_trainer
+
+        return scld_trainer
 
     elif alg_name == "ldvi_depr":
         from algorithms.langevin_diffusion.ldvi_trainer import ldvi_trainer

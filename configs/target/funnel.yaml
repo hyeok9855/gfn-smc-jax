@@ -29,6 +29,11 @@ hmc:  # Hamilton Monte Carlo
 smc: # Sequential Monte Carlo Sampler
   initial_scale: 1.
 
+smc_advanced:
+  initial_scale: 1.
+  target_ess: 0.99
+  hmc_step_size: [0.1, 0.2]
+
 flow_transport: # Flow Transport Methods (AFT/CRAFT)
   initial_scale: 1.
   step_size: 1e-3
@@ -51,6 +56,13 @@ cmcd:  # Controlled Monte Carlo Diffusions
   max_diffusion: 1.
   initial_scale: 1.
   step_size: 5e-4
+
+scld:
+  max_diffusion: 1. 
+  initial_scale: 1.
+  step_size: 1e-3
+  annealing_step_size: 1e-2
+  n_sub_traj: 128
 
 pis: # Path Integral Sampler
   max_diffusion: 4. # Divided by 4 roughly gives the initial scale

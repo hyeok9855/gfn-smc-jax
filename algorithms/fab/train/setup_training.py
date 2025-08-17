@@ -1,7 +1,7 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
 from functools import partial
-from typing import Any, Callable, NamedTuple, Optional, Union
+from typing import Any, Callable, NamedTuple, Optional, Union, cast
 
 import chex
 import jax
@@ -65,6 +65,7 @@ def setup_plotter(
         _, x_smc_resampled = simple_resampling(key, log_w, x_smc)
 
         if buffer is not None:
+            state = cast(TrainStateWithBuffer, state)
             x_buffer = buffer.sample(key, state.buffer_state, plot_batch_size)[0]
         else:
             x_buffer = None

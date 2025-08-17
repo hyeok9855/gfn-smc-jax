@@ -1,22 +1,21 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
 """Rewrite of Blackjax HMC kernel for fab preventing re-evaluation of p and q."""
-from typing import Callable, NamedTuple, Optional, Tuple, Union
+from typing import Callable, NamedTuple, Tuple, Union
+
+import chex
+import jax
 
 import blackjax.mcmc.metrics as metrics
 import blackjax.mcmc.proposal as proposal
 import blackjax.mcmc.trajectory as trajectory
-import chex
-import jax
-from blackjax.mcmc.integrators import EuclideanKineticEnergy
-from blackjax.mcmc.trajectory import hmc_energy
-from blackjax.types import Array, ArrayLikeTree, ArrayTree, PRNGKey
-
 from algorithms.fab.sampling.base import (
     Point,
     get_grad_intermediate_log_prob,
     get_intermediate_log_prob,
 )
+from blackjax.mcmc.trajectory import hmc_energy
+from blackjax.types import Array, ArrayTree, PRNGKey
 
 
 class IntegratorState(NamedTuple):
@@ -30,13 +29,13 @@ class IntegratorState(NamedTuple):
     alpha: float
 
     @property
-    def logdensity(self) -> float:
+    def logdensity(self) -> chex.Array:
         return get_intermediate_log_prob(
             log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha
         )
 
     @property
-    def logdensity_grad(self) -> ArrayTree:
+    def logdensity_grad(self) -> chex.Array:
         return get_grad_intermediate_log_prob(
             grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p, beta=self.beta, alpha=self.alpha
         )
@@ -57,13 +56,13 @@ class HMCState(NamedTuple):
     alpha: float
 
     @property
-    def logdensity(self) -> float:
+    def logdensity(self) -> chex.Array:
         return get_intermediate_log_prob(
             log_q=self.log_q, log_p=self.log_p, beta=self.beta, alpha=self.alpha
         )
 
     @property
-    def logdensity_grad(self) -> ArrayTree:
+    def logdensity_grad(self) -> chex.Array:
         return get_grad_intermediate_log_prob(
             grad_log_q=self.grad_log_q, grad_log_p=self.grad_log_p, beta=self.beta, alpha=self.alpha
         )
@@ -72,7 +71,7 @@ class HMCState(NamedTuple):
 def velocity_verlet(
     log_q_fn: Callable,
     log_p_fn: Callable,
-    kinetic_energy_fn: EuclideanKineticEnergy,
+    kinetic_energy_fn: metrics.KineticEnergy,
 ) -> EuclideanIntegrator:
     a1 = 0
     b1 = 0.5
@@ -161,7 +160,10 @@ def kernel(
     ) -> Tuple[HMCState, HMCInfo]:
         """Generate a new sample with the HMC kernel."""
 
-        momentum_generator, kinetic_energy_fn, _ = metrics.gaussian_euclidean(inverse_mass_matrix)
+        metric: metrics.Metric = metrics.gaussian_euclidean(inverse_mass_matrix)
+        momentum_generator = metric.sample_momentum
+        kinetic_energy_fn = metric.kinetic_energy
+
         symplectic_integrator = integrator(log_q_fn, log_p_fn, kinetic_energy_fn)
         proposal_generator = hmc_proposal(
             symplectic_integrator,

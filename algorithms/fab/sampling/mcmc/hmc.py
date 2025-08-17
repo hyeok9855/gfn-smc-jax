@@ -1,7 +1,7 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
 from functools import partial
-from typing import NamedTuple, Optional, Tuple
+from typing import NamedTuple, Tuple
 
 import chex
 import jax.numpy as jnp

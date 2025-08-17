@@ -1,6 +1,6 @@
 """Code builds on https://github.com/google-deepmind/annealed_flow_transport"""
 
-from typing import Tuple
+from typing import Callable, Tuple
 
 import chex
 import jax
@@ -23,15 +23,19 @@ assert_trees_all_equal_shapes = chex.assert_trees_all_equal_shapes
 class InterpolatedStepSize(object):
     """Interpolate MCMC step sizes."""
 
-    def __init__(self, step_times, step_sizes, total_num_time_steps: int):
+    def __init__(self, step_times, step_sizes, total_num_time_steps: int, beta_schedule):
         self.step_times = step_times
         self.step_sizes = step_sizes
         self._total_num_time_steps = total_num_time_steps
+        self.beta_schedule = beta_schedule
 
     def __call__(self, time_step: int):
-        final_step = self._total_num_time_steps - 1.0
-        beta = time_step / final_step
-        return jnp.interp(beta, jnp.array(self.step_times), jnp.array(self.step_sizes))
+        beta = self.beta_schedule(time_step)
+        return jnp.interp(
+            jax.lax.stop_gradient(beta),
+            jnp.array(self.step_times),
+            jnp.array(self.step_sizes),
+        )
 
 
 def tree_add(tree_a, tree_b):
@@ -332,26 +336,38 @@ class MarkovTransitionKernel(object):
         density_by_step: LogDensityByStep,
         total_time_steps: int,
         reverse: bool = False,
+        fixed_linear_beta_schedule=True,
+        beta_schedule: Callable = None,
     ):
         self._config = config
         self._density_by_step = density_by_step
 
         self._hmc = self._rwm = False
 
+        if fixed_linear_beta_schedule:
+            beta_schedule = lambda time_step: time_step / (total_time_steps - 1)
+
         if config.mcmc_kernel == "hmc":
             self._hmc = True
             if reverse:
-                config.hmc_step_size.reverse()
+                config.hmc_step_size.reverse()  # type: ignore
             self._hmc_step_sizes = InterpolatedStepSize(
-                config.hmc_step_times, config.hmc_step_sizes, total_time_steps
+                config.hmc_step_times,
+                config.hmc_step_sizes,
+                total_time_steps,
+                beta_schedule,
             )
 
         if config.mcmc_kernel == "rwm":
             self._rwm = True
             if reverse:
-                config.rwm_step_config.step_sizes.reverse()
+                config.rwm_step_config.step_sizes.reverse()  # type: ignore
+
             self._rwm_step_sizes = InterpolatedStepSize(
-                config.rwm_step_times, config.rwm_step_sizes, total_time_steps
+                config.rwm_step_times,
+                config.rwm_step_sizes,
+                total_time_steps,
+                beta_schedule,
             )
 
     def __call__(self, step: int, key: RandomKey, samples: Samples) -> Array:

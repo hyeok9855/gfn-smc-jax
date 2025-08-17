@@ -34,6 +34,11 @@ def reset_device_memory(delete_objs=True):
     Returns:
       number of DeviceArrays that were manually freed.
     """
+    # https://github.com/google/jax/issues/1222#issuecomment-597683078
+    backend = jax.lib.xla_bridge.get_backend()  # type: ignore
+    for buf in backend.live_buffers():
+        buf.delete()
+    """
     dvals = (x for x in gc.get_objects() if isinstance(x, jax.xla.DeviceValue))
     n_deleted = 0
     for dv in dvals:
@@ -50,9 +55,10 @@ def reset_device_memory(delete_objs=True):
     gc.collect()
 
     backend = jax.lib.xla_bridge.get_backend()
-    for buf in backend.live_buffers():
-        buf.delete()
+    for buf in backend.live_buffers(): buf.delete()
     return n_deleted
+    """
+    return None
 
 
 def stable_mean(x):
