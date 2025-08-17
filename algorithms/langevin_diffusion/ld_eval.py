@@ -4,8 +4,6 @@ import jax
 import jax.numpy as jnp
 from jax._src.flatten_util import ravel_pytree
 
-from algorithms.common.eval_methods.utils import moving_averages, save_samples
-from algorithms.common.ipm_eval import discrepancies
 from algorithms.langevin_diffusion.cmcd import per_sample_elbo as cmcd_per_sample_elbo
 from algorithms.langevin_diffusion.ld_init import (
     initialize_cmcd,
@@ -16,6 +14,8 @@ from algorithms.langevin_diffusion.ld_init import (
 )
 from algorithms.langevin_diffusion.od_langevin import per_sample_elbo as od_per_sample_elbo
 from algorithms.langevin_diffusion.ud_langevin import per_sample_elbo as ud_per_sample_elbo
+from eval import discrepancies
+from eval.utils import moving_averages, save_samples
 from utils.path_utils import project_path
 
 

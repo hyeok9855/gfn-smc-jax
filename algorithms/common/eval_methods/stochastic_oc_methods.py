@@ -3,8 +3,13 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from algorithms.common.eval_methods.utils import compute_reverse_ess, moving_averages, save_samples
-from algorithms.common.ipm_eval import discrepancies
+from eval import discrepancies
+from eval.utils import (
+    avg_stddiv_across_marginals,
+    compute_reverse_ess,
+    moving_averages,
+    save_samples,
+)
 
 
 def get_eval_fn(rnd, target, target_samples, cfg):
@@ -25,10 +30,13 @@ def get_eval_fn(rnd, target, target_samples, cfg):
         "discrepancies/mmd": [],
         "discrepancies/sd": [],
         "other/target_log_prob": [],
+        "other/delta_mean_marginal_std": [],
         "other/EMC": [],
         "stats/step": [],
         "stats/wallclock": [],
         "stats/nfe": [],
+        "log_var/log_var": [],
+        "log_var/traj_bal_ln_z": [],
     }
 
     def short_eval(model_state, key):
@@ -39,11 +47,12 @@ def get_eval_fn(rnd, target, target_samples, cfg):
             params = (model_state.params,)
         samples, running_costs, stochastic_costs, terminal_costs = rnd_reverse(
             key, model_state, *params
-        )
+        )[:4]
 
         log_is_weights = -(running_costs + stochastic_costs + terminal_costs)
         ln_z = jax.scipy.special.logsumexp(log_is_weights) - jnp.log(cfg.eval_samples)
         elbo = -jnp.mean(running_costs + terminal_costs)
+        log_var = jnp.var(running_costs + terminal_costs, ddof=0)
 
         if target.log_Z is not None:
             logger["logZ/delta_reverse"].append(jnp.abs(ln_z - target.log_Z))
@@ -52,11 +61,18 @@ def get_eval_fn(rnd, target, target_samples, cfg):
         logger["KL/elbo"].append(elbo)
         logger["ESS/reverse"].append(compute_reverse_ess(log_is_weights, cfg.eval_samples))
         logger["other/target_log_prob"].append(jnp.mean(target.log_prob(samples)))
+        logger["other/delta_mean_marginal_std"].append(
+            jnp.abs(avg_stddiv_across_marginals(samples) - target.marginal_std)
+        )
+        logger["log_var/log_var"].append(log_var)
 
         if cfg.compute_forward_metrics and target.can_sample:
-            fwd_samples, fwd_running_costs, fwd_stochastic_costs, fwd_terminal_costs = rnd_forward(
-                jax.random.PRNGKey(0), model_state, *params
-            )
+            (
+                fwd_samples,
+                fwd_running_costs,
+                fwd_stochastic_costs,
+                fwd_terminal_costs,
+            ) = rnd_forward(jax.random.PRNGKey(0), model_state, *params)[:4]
             fwd_log_is_weights = -(fwd_running_costs + fwd_stochastic_costs + fwd_terminal_costs)
             fwd_ln_z = -(
                 jax.scipy.special.logsumexp(-fwd_log_is_weights) - jnp.log(cfg.eval_samples)
@@ -86,7 +102,19 @@ def get_eval_fn(rnd, target, target_samples, cfg):
             )
 
         if cfg.moving_average.use_ma:
-            logger.update(moving_averages(logger, window_size=cfg.moving_average.window_size))
+            for key, value in moving_averages(
+                logger, window_size=cfg.moving_average.window_size
+            ).items():
+                if isinstance(value, list):
+                    value = value[0]
+                if key in logger.keys():
+                    logger[key].append(value)
+                    logger[f"model_selection/{key}_MAX"].append(max(logger[key]))
+                    logger[f"model_selection/{key}_MIN"].append(min(logger[key]))
+                else:
+                    logger[key] = [value]
+                    logger[f"model_selection/{key}_MAX"] = [max(logger[key])]
+                    logger[f"model_selection/{key}_MIN"] = [min(logger[key])]
 
         if cfg.save_samples:
             save_samples(cfg, logger, samples)

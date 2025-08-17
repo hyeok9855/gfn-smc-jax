@@ -4,12 +4,12 @@ import jax
 import jax.numpy as jnp
 import wandb
 
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.langevin_diffusion.ld_eval import eval_langevin
 from algorithms.langevin_diffusion.ld_init import initialize_mcd
 from algorithms.langevin_diffusion.ld_utils import collect_eps
 from algorithms.langevin_diffusion.od_langevin import compute_elbo, per_sample_elbo, per_sample_eubo
 from algorithms.langevin_diffusion.optimizer import adam
+from eval.utils import extract_last_entry
 from utils.print_utils import print_results
 
 

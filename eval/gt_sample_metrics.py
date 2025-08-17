@@ -5,7 +5,7 @@ import jax.random
 import numpy as np
 from omegaconf import DictConfig
 
-from algorithms.common.ipm_eval import discrepancies
+from eval import discrepancies
 
 """
 Small script for computing the distance between two ground truth sets of samples from the target.

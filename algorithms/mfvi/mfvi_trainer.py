@@ -12,8 +12,8 @@ import wandb
 from jax import grad, jit
 
 from algorithms.common.eval_methods.tractable_density_methods import get_eval_fn
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.common.utils import get_optimizer
+from eval.utils import extract_last_entry
 from targets.base_target import Target
 from utils.print_utils import print_results
 

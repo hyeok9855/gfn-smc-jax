@@ -11,8 +11,8 @@ import jax
 import wandb
 
 from algorithms.common.eval_methods.sis_methods import get_eval_fn
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.fab.train.setup_training import setup_fab_config
+from eval.utils import extract_last_entry
 from utils.path_utils import make_model_dir, project_path
 from utils.print_utils import print_results
 

@@ -3,6 +3,18 @@ import jax.numpy as jnp
 from utils.path_utils import project_path
 
 
+def avg_stddiv_across_marginals(samples):
+    # In accordance to https://arxiv.org/abs/2307.01198
+    # We compute the stddiv estimate
+    # Input: A (batch_size, dim) tensor of terminal examples
+    # Output: The computed value
+    d = samples.shape[-1]
+    res = 0
+    for i in range(d):
+        res += jnp.std(samples[:, i])
+    return res / d
+
+
 def moving_averages(dictionary, window_size=5):
     mov_avgs = {}
     for key, value in dictionary.items():

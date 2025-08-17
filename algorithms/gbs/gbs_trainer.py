@@ -14,9 +14,9 @@ import wandb
 from flax.training import train_state
 
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.common.models.pisgrad_net import PISGRADNet
 from algorithms.gbs.gbs_isw import neg_elbo, rnd
+from eval.utils import extract_last_entry
 from utils.print_utils import print_results
 
 

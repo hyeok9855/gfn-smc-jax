@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 
-from algorithms.common.eval_methods.utils import moving_averages, save_samples
-from algorithms.common.ipm_eval import discrepancies
+from eval import discrepancies
+from eval.utils import avg_stddiv_across_marginals, moving_averages, save_samples
 
 
 def get_eval_fn(cfg, target, target_samples):
@@ -17,13 +17,12 @@ def get_eval_fn(cfg, target, target_samples):
         "discrepancies/mmd": [],
         "discrepancies/sd": [],
         "other/target_log_prob": [],
+        "other/delta_mean_marginal_std": [],
         "other/EMC": [],
         "stats/step": [],
         "stats/wallclock": [],
         "stats/nfe": [],
     }
-
-    n_eval_samples = cfg.eval_samples
 
     def eval_fn(samples, elbo, rev_lnz, eubo, fwd_lnz):
 
@@ -33,7 +32,9 @@ def get_eval_fn(cfg, target, target_samples):
         logger["logZ/reverse"].append(rev_lnz)
         logger["KL/elbo"].append(elbo)
         logger["other/target_log_prob"].append(jnp.mean(target.log_prob(samples)))
-
+        logger["other/delta_mean_marginal_std"].append(
+            jnp.abs(avg_stddiv_across_marginals(samples) - target.marginal_std)
+        )
         if cfg.compute_forward_metrics and (target_samples is not None):
             if target.log_Z is not None:
                 logger["logZ/delta_forward"].append(jnp.abs(fwd_lnz - target.log_Z))
@@ -52,7 +53,19 @@ def get_eval_fn(cfg, target, target_samples):
                 else jnp.inf
             )
         if cfg.moving_average.use_ma:
-            logger.update(moving_averages(logger, window_size=cfg.moving_average.window_size))
+            for key, value in moving_averages(
+                logger, window_size=cfg.moving_average.window_size
+            ).items():
+                if isinstance(value, list):
+                    value = value[0]
+                if key in logger.keys():
+                    logger[key].append(value)
+                    logger[f"model_selection/{key}_MAX"].append(max(logger[key]))
+                    logger[f"model_selection/{key}_MIN"].append(min(logger[key]))
+                else:
+                    logger[key] = [value]
+                    logger[f"model_selection/{key}_MAX"] = [max(logger[key])]
+                    logger[f"model_selection/{key}_MIN"] = [min(logger[key])]
 
         if cfg.save_samples:
             save_samples(cfg, logger, samples)

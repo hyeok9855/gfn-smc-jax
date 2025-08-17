@@ -4,8 +4,8 @@ import jax
 import wandb
 
 from algorithms.common.eval_methods.tractable_density_methods import get_eval_fn
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.gmmvi.optimization.gmmvi import setup_gmmvi
+from eval.utils import extract_last_entry
 from utils.print_utils import print_results
 
 """

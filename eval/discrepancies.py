@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 
-from algorithms.common.ipm_eval import mmd_median, optimal_transport
+from eval import mmd_median, optimal_transport
 
 
 def compute_mmd(gt_samples, samples, config):

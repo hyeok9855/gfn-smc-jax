@@ -1,6 +1,3 @@
-import os
-from typing import List
-
 import chex
 import distrax
 import jax
@@ -9,11 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import wandb
 
+from eval.utils import avg_stddiv_across_marginals
 from targets.base_target import Target
 from utils.path_utils import project_path
 
 
-def visualize_samples(samples, show=False):
+def visualize_samples(samples, num_goals, show=False):
     def visualize_n_link(theta, num_dimensions, l):
         x = [0]
         y = [0]
@@ -24,13 +22,23 @@ def visualize_samples(samples, show=False):
                 [x[-2], x[-1]], [y[-2], y[-1]], color="k", linestyle="-", linewidth=2, alpha=0.3
             )
         ax.plot(x[-1], y[-1], "o", c="k")
-        ax.plot(0.7 * num_dimensions, 0, "rx")
         return ax
 
     fig, ax = plt.subplots()
     num_dimensions = samples.shape[1]
-    ax.set_xlim([-0.2 * num_dimensions, num_dimensions])
-    ax.set_ylim([-0.5 * num_dimensions, 0.5 * num_dimensions])
+
+    if num_goals == 1:
+        ax.plot(0.7 * num_dimensions, 0, "rx")
+        ax.set_xlim([-0.2 * num_dimensions, num_dimensions])
+        ax.set_ylim([-0.5 * num_dimensions, 0.5 * num_dimensions])
+    else:
+        mx = [1, 0, -1, 0]
+        my = [0, 1, 0, -1]
+        for i in range(4):
+            ax.plot(0.7 * num_dimensions * mx[i], 0.7 * num_dimensions * my[i], "rx")
+        ax.set_xlim([-num_dimensions, num_dimensions])
+        ax.set_ylim([-num_dimensions, num_dimensions])
+
     [num_samples, num_dimensions] = samples.shape
     for i in range(0, num_samples):
         visualize_n_link(samples[i], num_dimensions, np.ones(num_dimensions))
@@ -42,6 +50,16 @@ def visualize_samples(samples, show=False):
 
     # import tikzplotlib
     # tikzplotlib.save(os.path.join(project_path('./figures/'), f"robot.tex"))
+
+
+def sample_without_replacement(key: chex.Array, logits: chex.Array, n: int) -> chex.Array:
+    # https://timvieira.github.io/blog/post/2014/07/31/gumbel-max-trick/
+    key1, key2 = jax.random.split(key)
+    z = jax.random.gumbel(key=key1, shape=logits.shape)
+    # vals, indices = jax.lax.approx_max_k(z + logits, n)
+    vals, indices = jax.lax.top_k(z + logits, n)
+    indices = jax.random.permutation(key2, indices)
+    return indices
 
 
 class PlanarRobot(Target):
@@ -62,7 +80,7 @@ class PlanarRobot(Target):
         self.prior = distrax.MultivariateNormalDiag(loc=jnp.zeros(dim), scale_diag=prior_stds)
         self.link_lengths = jnp.ones(self.dim)
 
-        # Load ground truth samples
+        # Load ground truth samples (for 1 goal). gt_samples is (num_samples = 10k, 10)
         self.gt_samples = jnp.array(
             jnp.load(project_path("targets/data/planar_robot_gt_10k.npz"))["arr_0"]
         )
@@ -84,17 +102,29 @@ class PlanarRobot(Target):
                 distrax.MultivariateNormalDiag(loc=goal, scale_diag=goal_std)
             )
 
+        if num_goals == 4:
+            # Works by symmetry argument hopefully
+            rotations = [self.gt_samples.at[:, 0].add(i * jnp.pi / 2) for i in range(-2, 2)]
+            sample_and_rotations = jnp.concat(rotations)  # (num_samples * 4, 10)
+            sample_and_rotations = sample_and_rotations.at[:, 0].set(
+                jnp.mod(sample_and_rotations[:, 0], 2 * jnp.pi) - jnp.pi
+            )
+
+            log_probs_unrotated = self.log_prob(self.gt_samples)
+            log_rnds = self.log_prob(sample_and_rotations) - jnp.tile(
+                log_probs_unrotated, 4
+            )  # rnds
+
+            # Gumbel-Softmax!
+            gt_sample_indices = sample_without_replacement(
+                jax.random.PRNGKey(0), log_rnds, self.num_gt_samples
+            )
+            self.gt_samples = sample_and_rotations[gt_sample_indices]
+
     def likelihood(self, pos):
         likelihoods = jnp.stack([goal.log_prob(pos) for goal in self.goal_Gaussians], axis=0)
         return jnp.max(likelihoods, axis=0)
 
-    # def forward_kinematics(self, theta):
-    #     y = 0.
-    #     x = 0.
-    #     for i in range(self.dim):
-    #         y += self.link_lengths[i] * jnp.sin(jnp.sum(theta[:i + 1]))
-    #         x += self.link_lengths[i] * jnp.cos(jnp.sum(theta[:i + 1]))
-    #     return jnp.column_stack((x, y))
     def forward_kinematics(
         self, theta
     ):  # todo implement the batched version from oleg and follow the other target functions
@@ -118,23 +148,25 @@ class PlanarRobot(Target):
 
         return log_prob
 
-        # per_sample_lp = lambda x: self.prior.log_prob(x) + self.likelihood(self.forward_kinematics(x))
-        # lps = jax.vmap(per_sample_lp)(theta).reshape(-1, )
-        # return self.prior.log_prob(theta) + self.likelihood(self.forward_kinematics(theta))
-        # return self.likelihood(self.forward_kinematics(theta))
-        # return lps
+    @property
+    def marginal_std(self):
+        # numerical integration
+        samples = self.sample(jax.random.PRNGKey(0), (2000,))
+        return avg_stddiv_across_marginals(samples)
 
     def visualise(self, samples: chex.Array = None, axes=None, show=False, prefix="") -> dict:
         """Visualise samples from the model."""
         plt.close()
-        num_samples = 100
+        num_samples = 1000
         idx = jax.random.choice(jax.random.PRNGKey(0), samples.shape[0], shape=(num_samples,))
-        return visualize_samples(samples[idx], show=show)
+        return visualize_samples(samples[idx], len(self.goals), show=show)
 
     def sample(self, seed: chex.PRNGKey, sample_shape: chex.Shape) -> chex.Array:
         # Generate a subset of the ground truth sample set
+
         indices = jax.random.choice(seed, self.num_gt_samples, shape=sample_shape, replace=False)
         # Use the generated indices to select the subset
+
         return self.gt_samples[indices]
 
 

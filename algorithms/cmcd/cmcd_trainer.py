@@ -16,8 +16,8 @@ from flax.training import train_state
 
 from algorithms.cmcd.cmcd_rnd import neg_elbo, rnd
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
-from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.common.models.pisgrad_net import PISGRADNet
+from eval.utils import extract_last_entry
 from utils.helper import inverse_softplus
 from utils.print_utils import print_results
 

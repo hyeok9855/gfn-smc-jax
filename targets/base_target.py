@@ -2,6 +2,7 @@ import abc
 from typing import Callable, List, Optional, Tuple, Union
 
 import chex
+import jax
 import matplotlib.pyplot as plt
 
 LogProbFn = Callable[[chex.Array], chex.Array]
@@ -24,6 +25,17 @@ class Target(abc.ABC):
     def dim(self) -> int:
         """Dimensionality of the problem."""
         return self._dim
+
+    @property
+    def marginal_std(self):
+        # numerical integration
+        if not self.can_sample:
+            # then the delta_stds outputted becomes just the log_std
+            return 0
+        from eval.utils import avg_stddiv_across_marginals
+
+        samples = self.sample(jax.random.PRNGKey(0), (100000,))
+        return avg_stddiv_across_marginals(samples)
 
     @property
     def can_sample(self) -> bool:
