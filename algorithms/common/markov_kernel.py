@@ -2,12 +2,13 @@
 
 from typing import Tuple
 
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
 import numpy as np
 import tensorflow_probability.substrates.jax as tfp
+
+import algorithms.common.types as tp
 
 mcmc = tfp.mcmc
 ConfigDict = tp.ConfigDict

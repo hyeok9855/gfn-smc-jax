@@ -5,10 +5,10 @@ from typing import NamedTuple, Sequence, Union
 import distrax
 import jax.numpy as jnp
 
-from algorithms.fab.flow.flow import FlowRecipe, Flow, create_flow
-from algorithms.fab.flow.distrax_with_extra import ChainWithExtra
-from algorithms.fab.flow.build_coupling_bijector import build_split_coupling_bijector
 from algorithms.fab.flow.act_norm import build_act_norm_layer
+from algorithms.fab.flow.build_coupling_bijector import build_split_coupling_bijector
+from algorithms.fab.flow.distrax_with_extra import ChainWithExtra
+from algorithms.fab.flow.flow import Flow, FlowRecipe, create_flow
 
 
 class FlowDistConfig(NamedTuple):

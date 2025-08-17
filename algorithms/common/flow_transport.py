@@ -2,12 +2,13 @@
 
 from typing import Any, Tuple, Union
 
-from algorithms.common import resampling
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
 from jax.scipy.special import logsumexp
+
+import algorithms.common.types as tp
+from algorithms.common import resampling
 
 Array = tp.Array
 FlowApply = tp.FlowApply

@@ -1,6 +1,8 @@
 import gc
+
 import jax
 import jax.numpy as jnp
+from flax import traverse_util
 
 
 def flatten_dict(d, parent_key="", sep="_"):

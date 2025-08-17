@@ -1,46 +1,48 @@
+from typing import Callable, NamedTuple
+
+import chex
+import jax
+import jax.numpy as jnp
+
 from algorithms.gmmvi.configs import get_default_algorithm_config, update_config
 from algorithms.gmmvi.models.gmm import setup_diagonal_gmm, setup_full_cov_gmm
 from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState, setup_gmm_wrapper
-from algorithms.gmmvi.optimization.gmmvi_modules.component_stepsize_adaptation import (
-    setup_improvement_based_stepsize_adaptation,
-    setup_decaying_component_stepsize_adaptation,
-    setup_fixed_component_stepsize_adaptation,
-)
 from algorithms.gmmvi.optimization.gmmvi_modules.component_adaptation import (
     ComponentAdaptationState,
     setup_fixed_component_adaptation,
     setup_vips_component_adaptation,
 )
+from algorithms.gmmvi.optimization.gmmvi_modules.component_stepsize_adaptation import (
+    setup_decaying_component_stepsize_adaptation,
+    setup_fixed_component_stepsize_adaptation,
+    setup_improvement_based_stepsize_adaptation,
+)
 from algorithms.gmmvi.optimization.gmmvi_modules.ng_based_component_updater import (
-    setup_kl_constrained_ng_based_component_updater,
     setup_direct_ng_based_component_updater,
+    setup_kl_constrained_ng_based_component_updater,
     setup_ng_based_component_updater_iblr,
 )
 from algorithms.gmmvi.optimization.gmmvi_modules.ng_estimator import (
     NgEstimatorState,
-    setup_stein_ng_estimator,
     setup_more_ng_estimator,
+    setup_stein_ng_estimator,
 )
 from algorithms.gmmvi.optimization.gmmvi_modules.sample_selector import (
-    setup_vips_sample_selector,
-    setup_lin_sample_selector,
     setup_fixed_sample_selector,
+    setup_lin_sample_selector,
+    setup_vips_sample_selector,
 )
 from algorithms.gmmvi.optimization.gmmvi_modules.weight_stepsize_adaptation import (
     WeightStepsizeAdaptationState,
-    setup_fixed_weight_stepsize_adaptation,
     setup_decaying_weight_stepsize_adaptation,
+    setup_fixed_weight_stepsize_adaptation,
     setup_improvement_based_weight_stepsize_adaptation,
 )
 from algorithms.gmmvi.optimization.gmmvi_modules.weight_updater import (
-    setup_trust_region_based_weight_updater,
     setup_direct_weight_updater,
+    setup_trust_region_based_weight_updater,
 )
 from algorithms.gmmvi.optimization.sample_db import SampleDBState, setup_sampledb
-import jax
-import jax.numpy as jnp
-from typing import NamedTuple, Callable
-import chex
 
 
 class TrainState(NamedTuple):

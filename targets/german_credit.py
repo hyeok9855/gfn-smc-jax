@@ -1,9 +1,10 @@
 import chex
-import numpy as np
-import jax.numpy as jnp
 import jax
-from utils.path_utils import project_path
+import jax.numpy as jnp
+import numpy as np
+
 from targets.base_target import Target
+from utils.path_utils import project_path
 
 
 class GermanCredit(Target):

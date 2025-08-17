@@ -1,18 +1,17 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Tuple, NamedTuple, Optional
+from typing import NamedTuple, Optional, Tuple
 
 import chex
 import jax.numpy as jnp
 import jax.random
 
-
 from algorithms.fab.sampling.base import (
-    TransitionOperator,
-    Point,
     LogProbFn,
-    get_intermediate_log_prob,
+    Point,
+    TransitionOperator,
     create_point,
+    get_intermediate_log_prob,
 )
 
 

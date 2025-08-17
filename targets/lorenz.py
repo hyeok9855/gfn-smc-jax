@@ -1,10 +1,11 @@
 from typing import List
 
-import inference_gym.using_jax as gym
 import chex
-import matplotlib.pyplot as plt
+import inference_gym.using_jax as gym
 import jax
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
+
 from targets.base_target import Target
 
 

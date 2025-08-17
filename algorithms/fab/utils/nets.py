@@ -1,9 +1,9 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Sequence, Callable
+from typing import Callable, Sequence
 
-import jax
 import flax.linen as nn
+import jax
 
 
 class ConditionerMLP(nn.Module):

@@ -1,18 +1,18 @@
 import os
-
-import jax
-import jax.numpy as jnp
-import chex
-import jax.random as random
-import pandas as pd
-import numpy as np
-import numpyro.distributions as dist
-import wandb
-from scipy.stats import wishart
-from matplotlib import pyplot as plt
-from targets.base_target import Target
 from typing import List
 
+import chex
+import jax
+import jax.numpy as jnp
+import jax.random as random
+import numpy as np
+import numpyro.distributions as dist
+import pandas as pd
+import wandb
+from matplotlib import pyplot as plt
+from scipy.stats import wishart
+
+from targets.base_target import Target
 from utils.path_utils import project_path
 
 

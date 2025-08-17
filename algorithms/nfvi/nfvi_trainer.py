@@ -4,14 +4,13 @@ For further details see: https://arxiv.org/abs/1505.05770
 Code builds on https://github.com/google-deepmind/annealed_flow_transport
 """
 
+import distrax
+import haiku as hk
+import jax
 import jax.numpy as jnp
 
 from algorithms.common import flows
 from algorithms.common.utils import get_optimizer
-import distrax
-import haiku as hk
-import jax
-
 from algorithms.nfvi import nfvi
 
 

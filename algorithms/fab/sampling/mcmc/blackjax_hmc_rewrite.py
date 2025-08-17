@@ -1,22 +1,21 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
 """Rewrite of Blackjax HMC kernel for fab preventing re-evaluation of p and q."""
-from typing import Callable, NamedTuple, Tuple, Union, Optional
-
-import chex
-import jax
+from typing import Callable, NamedTuple, Optional, Tuple, Union
 
 import blackjax.mcmc.metrics as metrics
 import blackjax.mcmc.proposal as proposal
 import blackjax.mcmc.trajectory as trajectory
+import chex
+import jax
+from blackjax.mcmc.integrators import EuclideanKineticEnergy
 from blackjax.mcmc.trajectory import hmc_energy
 from blackjax.types import Array, ArrayLikeTree, ArrayTree, PRNGKey
-from blackjax.mcmc.integrators import EuclideanKineticEnergy
 
 from algorithms.fab.sampling.base import (
+    Point,
     get_grad_intermediate_log_prob,
     get_intermediate_log_prob,
-    Point,
 )
 
 

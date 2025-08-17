@@ -5,15 +5,16 @@ Code builds on https://github.com/lollcat/fab-jax.
 """
 
 import pickle
+from time import time
+
 import jax
 import wandb
 
 from algorithms.common.eval_methods.sis_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.fab.train.setup_training import setup_fab_config
-from time import time
-from utils.path_utils import project_path, make_model_dir
-from utils.print_util import print_results
+from utils.path_utils import make_model_dir, project_path
+from utils.print_utils import print_results
 
 
 def save_model(model_path, state, step):

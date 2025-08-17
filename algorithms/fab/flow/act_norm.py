@@ -1,15 +1,15 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Tuple, Callable
+from typing import Callable, Tuple
 
+import chex
 import distrax
 import flax.linen as nn
-import jax.numpy as jnp
 import jax
-import chex
+import jax.numpy as jnp
 import tensorflow_probability.substrates.jax as tfp
 
-from algorithms.fab.utils.jax_util import inverse_softplus
+from utils.helper import inverse_softplus
 
 
 class UnconditionalAffine(distrax.Bijector):

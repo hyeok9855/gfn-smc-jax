@@ -9,12 +9,12 @@ import jax.numpy as jnp
 import tensorflow_probability.substrates.jax as tfp
 
 from algorithms.fab.flow.distrax_with_extra import (
-    SplitCouplingWithExtra,
-    ChainWithExtra,
     BijectorWithExtra,
+    ChainWithExtra,
+    SplitCouplingWithExtra,
 )
 from algorithms.fab.utils.nets import ConditionerMLP
-from algorithms.fab.utils.jax_util import inverse_softplus
+from utils.helper import inverse_softplus
 
 
 def make_conditioner(name, n_output_params, mlp_units, identity_init):

@@ -1,7 +1,7 @@
-from flax import linen as nn
+import distrax
 import jax
 import jax.numpy as jnp
-import distrax
+from flax import linen as nn
 
 
 class NICE(nn.Module):

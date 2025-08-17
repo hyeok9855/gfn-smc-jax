@@ -1,15 +1,15 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Tuple, NamedTuple, Optional
 from functools import partial
+from typing import NamedTuple, Optional, Tuple
 
 import chex
 import jax.numpy as jnp
 import jax.random
 
-
-from algorithms.fab.sampling.base import TransitionOperator, Point, LogProbFn
-from algorithms.fab.sampling.mcmc.blackjax_hmc_rewrite import kernel as hmc_kernel, init as hmc_init
+from algorithms.fab.sampling.base import LogProbFn, Point, TransitionOperator
+from algorithms.fab.sampling.mcmc.blackjax_hmc_rewrite import init as hmc_init
+from algorithms.fab.sampling.mcmc.blackjax_hmc_rewrite import kernel as hmc_kernel
 
 
 class HMCState(NamedTuple):

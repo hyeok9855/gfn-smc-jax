@@ -1,10 +1,12 @@
-from typing import NamedTuple, Callable
-from jax import lax
-from algorithms.gmmvi.gmm_vi_utils.utils import reduce_weighted_logsumexp
-from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState, GMMWrapper
+from typing import Callable, NamedTuple
+
 import chex
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
+from jax import lax
+
+from algorithms.gmmvi.gmm_vi_utils.utils import reduce_weighted_logsumexp
+from algorithms.gmmvi.models.gmm_wrapper import GMMWrapper, GMMWrapperState
 
 
 class WeightUpdaterState(NamedTuple):

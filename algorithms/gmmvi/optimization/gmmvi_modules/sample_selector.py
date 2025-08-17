@@ -1,12 +1,13 @@
 import functools
-from typing import NamedTuple, Callable
+import time
+from typing import Callable, NamedTuple
+
 import chex
+import jax
 import jax.numpy as jnp
 
+from algorithms.gmmvi.models.gmm_wrapper import GMMWrapper, GMMWrapperState
 from algorithms.gmmvi.optimization.sample_db import SampleDB, SampleDBState
-from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState, GMMWrapper
-import jax
-import time
 
 
 class SampleSelectorState(NamedTuple):

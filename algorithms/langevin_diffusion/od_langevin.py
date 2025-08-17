@@ -1,7 +1,8 @@
 import jax
 import jax.numpy as jnp
+
 import algorithms.langevin_diffusion.base_dist as bd
-from algorithms.langevin_diffusion.ld_utils import sample_kernel, log_prob_kernel
+from algorithms.langevin_diffusion.ld_utils import log_prob_kernel, sample_kernel
 
 
 def evolve_overdamped_langevin(

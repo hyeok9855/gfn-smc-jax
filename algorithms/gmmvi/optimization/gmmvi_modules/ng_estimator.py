@@ -1,12 +1,14 @@
 from functools import partial
-from typing import Tuple, NamedTuple, Callable, Optional
+from typing import Callable, NamedTuple, Optional, Tuple
+
 import chex
-import jax.numpy as jnp
-from algorithms.gmmvi.gmm_vi_utils.utils import reduce_weighted_logsumexp
-from algorithms.gmmvi.optimization.least_squares import QuadRegression, QuadRegressionState
-from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState, GMMWrapper
 import jax
+import jax.numpy as jnp
 from jax._src.tree_util import Partial
+
+from algorithms.gmmvi.gmm_vi_utils.utils import reduce_weighted_logsumexp
+from algorithms.gmmvi.models.gmm_wrapper import GMMWrapper, GMMWrapperState
+from algorithms.gmmvi.optimization.least_squares import QuadRegression, QuadRegressionState
 
 
 class NgEstimatorState(NamedTuple):

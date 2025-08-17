@@ -1,14 +1,14 @@
 from typing import List
 
 import chex
+import jax
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpyro
-import jax
+import numpyro.distributions as pydist
 from jax._src.flatten_util import ravel_pytree
 
 from targets.base_target import Target
-import numpyro.distributions as pydist
-import jax.numpy as jnp
 
 data = {
     "R": [10, 23, 23, 26, 17, 5, 53, 55, 32, 46, 10, 8, 10, 8, 23, 0, 3, 22, 15, 32, 3],

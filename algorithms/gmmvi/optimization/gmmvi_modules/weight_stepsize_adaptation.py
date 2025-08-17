@@ -1,10 +1,11 @@
-from typing import NamedTuple, Callable, Optional
+from typing import Callable, NamedTuple, Optional
+
 import chex
+import jax
 import jax.numpy as jnp
 from jax import lax
 
 from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState
-import jax
 
 
 class WeightStepsizeAdaptationState(NamedTuple):

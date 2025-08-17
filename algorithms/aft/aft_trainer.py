@@ -4,14 +4,14 @@ For further details see https://arxiv.org/abs/2102.07501
 Code builds on https://github.com/google-deepmind/annealed_flow_transport
 """
 
-import jax.numpy as jnp
-
-from algorithms.aft import aft
-from algorithms.common import flow_transport, markov_kernel, flows
-from algorithms.common.utils import get_optimizer
 import distrax
 import haiku as hk
 import jax
+import jax.numpy as jnp
+
+from algorithms.aft import aft
+from algorithms.common import flow_transport, flows, markov_kernel
+from algorithms.common.utils import get_optimizer
 
 
 def aft_trainer(cfg, target):

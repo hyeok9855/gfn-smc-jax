@@ -1,13 +1,13 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import NamedTuple, Tuple, Iterable, Callable, Optional, Protocol
+from functools import partial
+from typing import Iterable, NamedTuple, Protocol, Tuple
 
+import chex
 import jax.lax
 import jax.numpy as jnp
-import chex
-from functools import partial
 
-from algorithms.fab.utils.jax_util import broadcasted_where
+from utils.jax_utils import broadcasted_where
 
 
 def sample_without_replacement(key: chex.Array, logits: chex.Array, n: int) -> chex.Array:

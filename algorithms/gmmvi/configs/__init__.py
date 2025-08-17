@@ -1,6 +1,7 @@
-import yaml
 import os
-from mergedeep import merge, Strategy
+
+import yaml
+from mergedeep import Strategy, merge
 
 
 def load_yaml(filename):

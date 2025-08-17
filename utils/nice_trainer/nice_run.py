@@ -1,8 +1,6 @@
 import functools
 import os
 import pickle
-from nice import NICE
-from flax import linen as nn
 
 import jax
 import jax.numpy as jnp
@@ -12,7 +10,10 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 import wandb
 from absl import app, flags
+from flax import linen as nn
 from ml_collections import config_flags
+from nice import NICE
+
 from utils.nice_trainer.nice_utils import (
     flatten_nested_dict,
     make_grid,

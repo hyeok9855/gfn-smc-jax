@@ -1,10 +1,10 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
 """Extension of distrax that allows for flow to pass forward extra information."""
-from typing import Tuple, Union, Callable, Optional, NamedTuple
+from typing import Callable, NamedTuple, Optional, Tuple, Union
 
-import distrax
 import chex
+import distrax
 import jax
 import jax.numpy as jnp
 from distrax._src.distributions.distribution import Array, PRNGKey

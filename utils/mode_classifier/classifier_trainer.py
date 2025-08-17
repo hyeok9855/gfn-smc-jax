@@ -2,13 +2,11 @@ import math
 
 import jax
 import jax.numpy as jnp  # JAX NumPy
-
-from flax import linen as nn  # The Linen API
-from flax.training import train_state, checkpoints
-import optax  # The Optax gradient processing and optimization library
-
 import numpy as np  # Ordinary NumPy
+import optax  # The Optax gradient processing and optimization library
 import tensorflow_datasets as tfds
+from flax import linen as nn  # The Linen API
+from flax.training import checkpoints, train_state
 
 from utils.mode_classifier.classifier_model import CNN, FashionMnistCNN
 from utils.mode_classifier.data_utils import load_dataset

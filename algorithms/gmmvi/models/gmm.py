@@ -1,7 +1,8 @@
+from typing import Callable, NamedTuple
+
 import chex
-import jax.numpy as jnp
 import jax
-from typing import NamedTuple, Callable
+import jax.numpy as jnp
 
 
 class GMMState(NamedTuple):

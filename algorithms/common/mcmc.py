@@ -2,15 +2,15 @@
 
 import time
 
-from absl import logging
-from algorithms.annealed_flow_transport import densities
-from algorithms.common import markov_kernel
-from algorithms.common import samplers
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
 import numpy as np
+from absl import logging
+from algorithms.annealed_flow_transport import densities
+
+import algorithms.common.types as tp
+from algorithms.common import markov_kernel, samplers
 
 Array = tp.Array
 LogDensityNoStep = tp.LogDensityNoStep

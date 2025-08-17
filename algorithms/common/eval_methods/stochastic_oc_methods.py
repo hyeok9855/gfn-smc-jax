@@ -3,7 +3,7 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from algorithms.common.eval_methods.utils import moving_averages, save_samples, compute_reverse_ess
+from algorithms.common.eval_methods.utils import compute_reverse_ess, moving_averages, save_samples
 from algorithms.common.ipm_eval import discrepancies
 
 

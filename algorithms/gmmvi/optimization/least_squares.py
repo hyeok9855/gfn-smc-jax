@@ -1,4 +1,5 @@
-from typing import NamedTuple, Callable, Optional
+from typing import Callable, NamedTuple, Optional
+
 import chex
 import jax.numpy as jnp
 

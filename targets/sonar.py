@@ -1,11 +1,11 @@
+import pickle
 from typing import List
 
 import chex
-import matplotlib.pyplot as plt
-import numpy as np
 import jax
 import jax.numpy as jnp
-import pickle
+import matplotlib.pyplot as plt
+import numpy as np
 import numpyro
 import numpyro.distributions as pydist
 from jax._src.flatten_util import ravel_pytree

@@ -7,8 +7,8 @@ import jax.numpy as jnp
 import jax.random
 import optax
 
-from algorithms.fab.sampling.smc import SequentialMonteCarloSampler, SMCState
 from algorithms.fab.flow.flow import Flow, FlowParams
+from algorithms.fab.sampling.smc import SequentialMonteCarloSampler, SMCState
 
 Params = chex.ArrayTree
 LogProbFn = Callable[[chex.Array], chex.Array]

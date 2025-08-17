@@ -1,9 +1,9 @@
 import os
 from typing import List
 
-import jax.numpy as jnp
-import distrax
 import chex
+import distrax
+import jax.numpy as jnp
 import jax.random
 import matplotlib.pyplot as plt
 import wandb

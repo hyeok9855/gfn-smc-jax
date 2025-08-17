@@ -1,23 +1,22 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import NamedTuple, Tuple, Protocol
 from functools import partial
+from typing import Callable, NamedTuple, Protocol, Tuple
 
 import chex
-import jax.numpy as jnp
 import jax
-from typing import Callable
+import jax.numpy as jnp
 
 from algorithms.fab.sampling.base import (
-    TransitionOperator,
     LogProbFn,
-    create_point,
     Point,
+    TransitionOperator,
+    create_point,
     get_intermediate_log_prob,
 )
-from algorithms.fab.sampling.resampling import log_effective_sample_size, optionally_resample
-from algorithms.fab.utils.jax_util import broadcasted_where
 from algorithms.fab.sampling.point_is_valid import PointIsValidFn, default_point_is_valid_fn
+from algorithms.fab.sampling.resampling import log_effective_sample_size, optionally_resample
+from utils.jax_utils import broadcasted_where
 
 
 class SMCState(NamedTuple):

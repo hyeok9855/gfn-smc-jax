@@ -1,9 +1,9 @@
+import distrax
 import jax
 import jax.numpy as jnp
 
 from algorithms.common import flow_transport, markov_kernel
 from algorithms.smc import smc
-import distrax
 
 """
 Code for Sequential Monte Carlo (SMC.

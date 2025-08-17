@@ -1,17 +1,16 @@
 from typing import List
 
 import chex
+import distrax
 import jax
 import jax.numpy as jnp
-import distrax
-from matplotlib import pyplot as plt
-import wandb
-
-from targets.base_target import Target
-from algorithms.fab.utils.plot import plot_marginal_pair, plot_contours_2D
-from utils.path_utils import project_path
 import matplotlib
+import wandb
+from matplotlib import pyplot as plt
 
+from algorithms.fab.utils.plot import plot_contours_2D, plot_marginal_pair
+from targets.base_target import Target
+from utils.path_utils import project_path
 
 # matplotlib.use('agg')
 

@@ -2,8 +2,9 @@
 
 from typing import Tuple
 
-import algorithms.common.types as tp
 import jax
+
+import algorithms.common.types as tp
 
 RandomKey = tp.RandomKey
 Array = tp.Array

@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 from flax import linen as nn
 
-from algorithms.common.models.langevin_net import TimeEncoder, StateTimeEncoder
+from algorithms.common.models.langevin_net import StateTimeEncoder, TimeEncoder
 
 
 class StateTimeNetwork(nn.Module):

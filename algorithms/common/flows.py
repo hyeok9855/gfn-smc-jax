@@ -3,12 +3,13 @@
 import abc
 from typing import Callable, List, Tuple
 
-import algorithms.common.types as tp
 import chex
 import haiku as hk
 import jax
 import jax.numpy as jnp
 import numpy as np
+
+import algorithms.common.types as tp
 
 Array = tp.Array
 Samples = tp.Samples

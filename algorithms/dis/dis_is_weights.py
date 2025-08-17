@@ -1,8 +1,9 @@
-import jax
-import jax.numpy as jnp
 from functools import partial
 
-from algorithms.cmcd.cmcd_rnd import sample_kernel, log_prob_kernel
+import jax
+import jax.numpy as jnp
+
+from algorithms.cmcd.cmcd_rnd import log_prob_kernel, sample_kernel
 
 
 def per_sample_rnd(

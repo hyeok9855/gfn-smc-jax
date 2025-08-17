@@ -1,12 +1,12 @@
-from algorithms.langevin_diffusion import base_dist as bd
-from jax._src.flatten_util import ravel_pytree
-
-from algorithms.langevin_diffusion.score_network import (
-    initialize_score_network,
-    initialize_pis_network,
-)
 import jax
 import jax.numpy as jnp
+from jax._src.flatten_util import ravel_pytree
+
+from algorithms.langevin_diffusion import base_dist as bd
+from algorithms.langevin_diffusion.score_network import (
+    initialize_pis_network,
+    initialize_score_network,
+)
 
 
 def initialize_ula(config, dim, base_dist_params=None):

@@ -1,10 +1,9 @@
+import jax
+import jax.numpy as jnp
 import optax
 from flax.training import train_state
 
 from algorithms.common.models.pisgrad_net import PISGRADNet
-import jax
-import jax.numpy as jnp
-
 from utils.helper import flattened_traversal
 
 

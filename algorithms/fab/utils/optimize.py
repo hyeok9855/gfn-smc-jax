@@ -1,11 +1,11 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import NamedTuple, Tuple, Optional
+from typing import NamedTuple, Optional, Tuple
 
 import chex
 import jax.lax
-import optax
 import jax.numpy as jnp
+import optax
 
 
 class IgnoreNanOptState(NamedTuple):

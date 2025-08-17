@@ -1,30 +1,32 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Callable, Optional, NamedTuple, Any, Union
 from functools import partial
+from typing import Any, Callable, NamedTuple, Optional, Union
+
 import chex
 import jax
 import jax.numpy as jnp
-from algorithms.fab.train.evaluate import setup_fab_eval_function
-from algorithms.fab.train import (
-    build_fab_no_buffer_init_step_fns,
-    TrainStateNoBuffer,
-    build_fab_with_buffer_init_step_fns,
-    TrainStateWithBuffer,
-)
-from algorithms.fab.buffer.prioritised_buffer import build_prioritised_buffer, PrioritisedBuffer
-from algorithms.fab.flow import build_flow, FlowDistConfig
+import optax
+
+from algorithms.fab.buffer.prioritised_buffer import PrioritisedBuffer, build_prioritised_buffer
+from algorithms.fab.flow import FlowDistConfig, build_flow
 from algorithms.fab.sampling import (
-    build_smc,
     build_blackjax_hmc,
-    simple_resampling,
     build_metropolis,
+    build_smc,
     default_point_is_valid_fn,
     point_is_valid_if_in_bounds_fn,
+    simple_resampling,
 )
-from algorithms.fab.utils.optimize import get_optimizer, OptimizerConfig
+from algorithms.fab.train import (
+    TrainStateNoBuffer,
+    TrainStateWithBuffer,
+    build_fab_no_buffer_init_step_fns,
+    build_fab_with_buffer_init_step_fns,
+)
+from algorithms.fab.train.evaluate import setup_fab_eval_function
+from algorithms.fab.utils.optimize import OptimizerConfig, get_optimizer
 from targets.base_target import Target
-import optax
 
 
 class TrainingState(NamedTuple):

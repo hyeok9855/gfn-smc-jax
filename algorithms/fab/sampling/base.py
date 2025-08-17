@@ -1,10 +1,9 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Dict, NamedTuple, Optional, Callable, Tuple, Protocol, Union
+from typing import Callable, Dict, NamedTuple, Optional, Protocol, Tuple, Union
 
 import chex
 import jax
-
 
 LogProbFn = Callable[[chex.Array], chex.Array]
 

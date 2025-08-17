@@ -1,6 +1,7 @@
+from functools import partial
+
 import jax
 import jax.numpy as jnp
-from functools import partial
 
 
 def cos_sq_fn_step_scheme(n_steps, noise_scale=1.0, s=0.008, dtype=jnp.float32):

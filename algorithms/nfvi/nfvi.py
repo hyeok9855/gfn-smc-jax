@@ -1,16 +1,16 @@
 import functools
 from time import time
 
-import wandb
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
 import optax
+import wandb
 
+import algorithms.common.types as tp
 from algorithms.common.eval_methods.tractable_density_methods import get_eval_fn
 from targets.base_target import Target
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 Array = jnp.ndarray
 UpdateFn = tp.UpdateFn

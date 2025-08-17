@@ -4,8 +4,8 @@ from typing import Callable
 
 import chex
 import distrax
-import jax.random
 import jax.numpy as jnp
+import jax.random
 
 
 def rejection_sampling(

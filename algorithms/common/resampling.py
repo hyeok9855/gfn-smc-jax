@@ -2,10 +2,11 @@
 
 from typing import Tuple
 
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
+
+import algorithms.common.types as tp
 
 Array = tp.Array
 RandomKey = tp.RandomKey

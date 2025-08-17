@@ -1,16 +1,16 @@
 """Taken from https://github.com/google-deepmind/annealed_flow_transport/blob/master/annealed_flow_transport/densities.py."""
 
-from typing import List
-
+import itertools
 import os.path as osp
 import pathlib
-import itertools
+from typing import List
+
+import chex
 import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as slinalg
-import numpy as np
-import chex
 import matplotlib.pyplot as plt
+import numpy as np
 
 from targets.base_target import Target
 from utils.path_utils import project_path

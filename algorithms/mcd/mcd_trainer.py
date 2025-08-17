@@ -16,10 +16,10 @@ from flax.training import train_state
 
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
-from algorithms.mcd.mcd_rnd import neg_elbo, rnd
 from algorithms.common.models.pisgrad_net import PISGRADNet
+from algorithms.mcd.mcd_rnd import neg_elbo, rnd
 from utils.helper import inverse_softplus
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 
 def mcd_trainer(cfg, target):

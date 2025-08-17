@@ -4,19 +4,19 @@ import pickle
 from time import time
 from typing import Any, Tuple, Union
 
-import wandb
-from algorithms.common import flow_transport
-import algorithms.common.types as tp
 import jax
 import jax.numpy as jnp
 import optax
+import wandb
 
+import algorithms.common.types as tp
+from algorithms.common import flow_transport
 from algorithms.common.eval_methods.sis_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.common.utils import reverse_transition_params
 from targets.base_target import Target
 from utils.path_utils import project_path
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 Array = tp.Array
 Samples = tp.Samples

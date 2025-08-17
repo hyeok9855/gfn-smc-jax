@@ -1,7 +1,9 @@
-from typing import NamedTuple, Callable
+from typing import Callable, NamedTuple
+
 import chex
-from algorithms.gmmvi.models.gmm import GMMState, GMM
 import jax.numpy as jnp
+
+from algorithms.gmmvi.models.gmm import GMM, GMMState
 
 
 class GMMWrapperState(NamedTuple):

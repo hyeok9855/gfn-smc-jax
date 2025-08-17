@@ -1,6 +1,6 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import NamedTuple, Callable, Tuple, Any
+from typing import Any, Callable, NamedTuple, Tuple
 
 import chex
 import distrax
@@ -8,7 +8,7 @@ import flax.linen as nn
 import jax
 import jax.numpy as jnp
 
-from algorithms.fab.flow.distrax_with_extra import Extra, BijectorWithExtra
+from algorithms.fab.flow.distrax_with_extra import BijectorWithExtra, Extra
 
 Params = chex.ArrayTree
 LogProb = chex.Array

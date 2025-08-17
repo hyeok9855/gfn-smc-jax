@@ -1,6 +1,6 @@
-import optax
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
+import optax
 
 
 def get_optimizer(initial_learning_rate: float, boundaries_and_scales):

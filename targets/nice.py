@@ -1,19 +1,19 @@
 """NICE TARGET"""
 
 import functools
-import os
 import math
+import os
 import pickle
-from typing import Optional, List
+from typing import List, Optional
 
 import chex
 import distrax
 import jax
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
 import numpy as np
 import wandb
 from flax import linen as nn
-import matplotlib.pyplot as plt
 from flax.training import checkpoints
 
 from targets.base_target import Target

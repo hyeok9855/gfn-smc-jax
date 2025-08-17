@@ -4,17 +4,17 @@ import jax
 import jax.numpy as jnp
 import wandb
 
+from algorithms.langevin_diffusion.cmcd import (
+    compute_elbo,
+    compute_log_var,
+    per_sample_elbo,
+    per_sample_eubo,
+)
 from algorithms.langevin_diffusion.ld_eval import eval_langevin
 from algorithms.langevin_diffusion.ld_init import initialize_cmcd
 from algorithms.langevin_diffusion.ld_utils import collect_eps
 from algorithms.langevin_diffusion.optimizer import adam
-from algorithms.langevin_diffusion.cmcd import (
-    compute_elbo,
-    per_sample_elbo,
-    per_sample_eubo,
-    compute_log_var,
-)
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 
 def cmcd_trainer(

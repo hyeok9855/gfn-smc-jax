@@ -1,5 +1,5 @@
-from typing import Tuple, Callable, List, Optional, Union
 import abc
+from typing import Callable, List, Optional, Tuple, Union
 
 import chex
 import matplotlib.pyplot as plt

@@ -11,7 +11,7 @@ from algorithms.langevin_diffusion.ld_utils import collect_eps, collect_gamma, s
 from algorithms.langevin_diffusion.optimizer import adam
 from algorithms.langevin_diffusion.ud_langevin import compute_elbo, per_sample_elbo, per_sample_eubo
 from utils.path_utils import make_model_dir
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 
 def ldvi_trainer(

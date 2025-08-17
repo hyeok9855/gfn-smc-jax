@@ -1,8 +1,8 @@
+import jax.numpy as jnp
+from ott.geometry import pointcloud
 from ott.problems.linear import linear_problem
 from ott.solvers.linear import sinkhorn
-import jax.numpy as jnp
 from ott.tools import sinkhorn_divergence
-from ott.geometry import pointcloud
 
 
 class OT:

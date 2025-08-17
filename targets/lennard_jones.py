@@ -43,19 +43,16 @@ SOFTWARE.
 """
 
 from dataclasses import dataclass
-from typing import Optional, Union, List
+from typing import List, Optional, Tuple, Union
 
 import chex
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
 import jax.random
 import matplotlib.pyplot as plt
-from typing import Tuple
-
 import wandb
 
 from targets.base_target import Target
-
 
 # ======================================================================================
 # Copied from file 'se3-augmented-coupling-flows/eacf/utils/graph.py':

@@ -1,10 +1,12 @@
-from typing import Union, NamedTuple, Callable, Optional
+from typing import Callable, NamedTuple, Optional, Union
+
 import chex
+import jax
 import jax.numpy as jnp
 import numpyro.distributions as dist
-import jax
-from algorithms.gmmvi.models.gmm_wrapper import GMMWrapperState, GMMWrapper
-from algorithms.gmmvi.optimization.sample_db import SampleDBState, SampleDB
+
+from algorithms.gmmvi.models.gmm_wrapper import GMMWrapper, GMMWrapperState
+from algorithms.gmmvi.optimization.sample_db import SampleDB, SampleDBState
 
 
 class ComponentAdaptationState(NamedTuple):

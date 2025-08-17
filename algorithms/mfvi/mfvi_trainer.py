@@ -3,18 +3,19 @@ Code for Gaussian Mean Field Variational Inference (MFVI).
 """
 
 from time import time
+
+import distrax
 import jax
 import jax.numpy as jnp
+import optax
 import wandb
 from jax import grad, jit
-import optax
-import distrax
 
 from algorithms.common.eval_methods.tractable_density_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.common.utils import get_optimizer
 from targets.base_target import Target
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 
 # Diagonal Gaussian Variational Distribution

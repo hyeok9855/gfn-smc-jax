@@ -1,19 +1,19 @@
+from typing import List
+
+import chex
 import distrax
 import jax
 import jax.numpy as jnp
-import chex
 import jax.random as random
 import matplotlib
 import numpy as np
 import numpyro.distributions as dist
 import wandb
-from scipy.stats import wishart
 from matplotlib import pyplot as plt
+from scipy.stats import wishart
+
 from targets.base_target import Target
-from typing import List
-
 from utils.path_utils import project_path
-
 
 # matplotlib.use('agg')
 

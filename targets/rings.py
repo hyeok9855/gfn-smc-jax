@@ -1,12 +1,13 @@
 import os
+from typing import List
 
+import chex
 import jax
 import jax.numpy as jnp
-import chex
 import wandb
 from matplotlib import pyplot as plt
+
 from targets.base_target import Target
-from typing import List
 
 
 class ConcentricRings(Target):

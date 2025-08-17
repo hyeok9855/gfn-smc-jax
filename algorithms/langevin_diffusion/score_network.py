@@ -1,16 +1,8 @@
 import chex
+import haiku as hk
 import jax
 import jax.numpy as np
-from jax.example_libraries.stax import (
-    Dense,
-    FanInSum,
-    FanOut,
-    Identity,
-    Softplus,
-    parallel,
-    serial,
-)
-import haiku as hk
+from jax.example_libraries.stax import Dense, FanInSum, FanOut, Identity, Softplus, parallel, serial
 
 
 def initialize_embedding(rng, nbridges, emb_dim, factor=0.05):

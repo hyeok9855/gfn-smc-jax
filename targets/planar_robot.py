@@ -1,17 +1,16 @@
 import os
-
-import jax.numpy as jnp
 from typing import List
-import jax
+
 import chex
 import distrax
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import numpy as np
 import wandb
 
 from targets.base_target import Target
 from utils.path_utils import project_path
-
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def visualize_samples(samples, show=False):

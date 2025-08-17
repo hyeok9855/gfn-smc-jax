@@ -3,19 +3,18 @@
 import time
 from typing import NamedTuple, Tuple, Union
 
-import wandb
-
-from algorithms.common import flow_transport
-import algorithms.common.types as tp
 import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+import wandb
 
+import algorithms.common.types as tp
+from algorithms.common import flow_transport
 from algorithms.common.eval_methods.sis_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from targets.base_target import Target
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 Array = tp.Array
 UpdateFn = tp.UpdateFn

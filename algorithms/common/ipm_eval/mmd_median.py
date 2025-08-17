@@ -1,6 +1,7 @@
-import jax.numpy as jnp
-from jax import vmap, jit
 from functools import partial
+
+import jax.numpy as jnp
+from jax import jit, vmap
 
 """
 Code for computing the Maximum-Mean-Discrepancy (MMD) based on https://github.com/antoninschrab/mmdfuse.

@@ -6,14 +6,13 @@ Code builds on https://github.com/google-deepmind/annealed_flow_transport
 
 import pickle
 
-import jax.numpy as jnp
-
-from algorithms.common import flow_transport, markov_kernel, flows
-from algorithms.common.utils import get_optimizer
 import distrax
 import haiku as hk
 import jax
+import jax.numpy as jnp
 
+from algorithms.common import flow_transport, flows, markov_kernel
+from algorithms.common.utils import get_optimizer
 from algorithms.craft import craft
 from utils.path_utils import project_path
 

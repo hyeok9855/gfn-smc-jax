@@ -4,7 +4,6 @@ from datetime import datetime
 import hydra
 import jax
 import matplotlib
-
 import wandb
 from omegaconf import DictConfig, OmegaConf
 

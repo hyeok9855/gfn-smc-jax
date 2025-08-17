@@ -1,13 +1,12 @@
 from time import time
 
+import jax
 import wandb
 
 from algorithms.common.eval_methods.tractable_density_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.gmmvi.optimization.gmmvi import setup_gmmvi
-import jax
-
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 """
 Code for Gaussian Mixture Model Variational Inference (GMMVI).

@@ -1,12 +1,12 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Optional, Tuple
 import itertools
+from typing import Optional, Tuple
 
+import chex
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
-import jax.numpy as jnp
-import chex
 import pandas as pd
 
 

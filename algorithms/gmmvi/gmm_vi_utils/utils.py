@@ -1,5 +1,5 @@
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
 
 
 def reduce_weighted_logsumexp(

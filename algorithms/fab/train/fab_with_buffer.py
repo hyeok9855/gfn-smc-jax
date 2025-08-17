@@ -1,6 +1,6 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Callable, NamedTuple, Tuple, Optional
+from typing import Callable, NamedTuple, Optional, Tuple
 
 import chex
 import jax.numpy as jnp
@@ -8,9 +8,9 @@ import jax.random
 import optax
 from jax.flatten_util import ravel_pytree
 
-from algorithms.fab.sampling.smc import SequentialMonteCarloSampler, SMCState
-from algorithms.fab.flow.flow import Flow, FlowParams
 from algorithms.fab.buffer import PrioritisedBuffer, PrioritisedBufferState
+from algorithms.fab.flow.flow import Flow, FlowParams
+from algorithms.fab.sampling.smc import SequentialMonteCarloSampler, SMCState
 from algorithms.fab.utils.optimize import IgnoreNanOptState
 
 Params = chex.ArrayTree

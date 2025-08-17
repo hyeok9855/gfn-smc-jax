@@ -1,16 +1,16 @@
 import os
+from typing import List
 
+import chex
 import distrax
 import jax
 import jax.numpy as jnp
-import chex
-import pandas as pd
 import numpyro.distributions as dist
-from matplotlib import pyplot as plt
-from targets.base_target import Target
-from typing import List
+import pandas as pd
 import wandb
+from matplotlib import pyplot as plt
 
+from targets.base_target import Target
 from utils.path_utils import project_path
 
 

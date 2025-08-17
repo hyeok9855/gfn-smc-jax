@@ -14,8 +14,8 @@ import wandb
 from algorithms.common.diffusion_related.init_model import init_model
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
-from algorithms.gfn.gfn_rnd import neg_elbo, log_variance, trajectory_balance, rnd
-from utils.print_util import print_results
+from algorithms.gfn.gfn_rnd import log_variance, neg_elbo, rnd, trajectory_balance
+from utils.print_utils import print_results
 
 
 def gfn_trainer(cfg, target):

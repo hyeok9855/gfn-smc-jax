@@ -5,7 +5,7 @@ import distrax
 import flax.linen as nn
 import jax.numpy as jnp
 
-from algorithms.fab.flow.distrax_with_extra import SplitCouplingWithExtra, ChainWithExtra
+from algorithms.fab.flow.distrax_with_extra import ChainWithExtra, SplitCouplingWithExtra
 
 
 class ConstantParametersFn(nn.Module):

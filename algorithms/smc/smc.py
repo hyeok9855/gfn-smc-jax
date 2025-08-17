@@ -7,19 +7,18 @@ Code builds on https://github.com/google-deepmind/annealed_flow_transport
 import time
 from typing import Tuple
 
-import wandb
-from algorithms.common import flow_transport
-from algorithms.common import resampling
-import algorithms.common.types as tp
 import chex
 import jax
 import jax.numpy as jnp
 import numpy as np
+import wandb
 
+import algorithms.common.types as tp
+from algorithms.common import flow_transport, resampling
 from algorithms.common.eval_methods.sis_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from targets.base_target import Target
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 Array = tp.Array
 LogDensityNoStep = tp.LogDensityNoStep

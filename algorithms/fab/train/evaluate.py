@@ -1,16 +1,16 @@
 """Code builds on https://github.com/lollcat/fab-jax"""
 
-from typing import Union
+from typing import Optional, Union
+
+import chex
 import jax
 import jax.numpy as jnp
-from algorithms.fab.sampling.smc import SequentialMonteCarloSampler
+
 from algorithms.fab.flow.flow import Flow
+from algorithms.fab.sampling.smc import SequentialMonteCarloSampler
 from algorithms.fab.train.fab_with_buffer import TrainStateWithBuffer
 from algorithms.fab.train.fab_without_buffer import TrainStateNoBuffer
-import chex
-from typing import Optional
 from targets.base_target import Target
-
 
 # max_elbo = -10000000000000
 

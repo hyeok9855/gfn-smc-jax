@@ -16,7 +16,7 @@ from algorithms.common.diffusion_related.init_model import init_model
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
 from algorithms.common.eval_methods.utils import extract_last_entry
 from algorithms.dds.dds_rnd import neg_elbo, rnd
-from utils.print_util import print_results
+from utils.print_utils import print_results
 
 
 def dds_trainer(cfg, target):

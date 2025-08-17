@@ -1,7 +1,9 @@
 from typing import List
-import inference_gym.using_jax as gym
+
 import chex
+import inference_gym.using_jax as gym
 import matplotlib.pyplot as plt
+
 from targets.base_target import Target
 
 
