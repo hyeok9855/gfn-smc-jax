@@ -63,7 +63,7 @@ def dynamic_update_ignore_and_grad_norm_clip(
         updates, new_opt_state, ignored_grad_count = jax.lax.cond(
             skip_update,
             lambda: (
-                jax.tree_map(jnp.zeros_like, updates),
+                jax.tree_utils.tree_map(jnp.zeros_like, updates),
                 opt_state.opt_state,
                 opt_state.ignored_grads_count + 1,
             ),

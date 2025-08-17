@@ -99,7 +99,7 @@ def eval(state, test_ds, epoch):
 def eval_model(model, batch_x, batch_y):
     metrics = eval_step(model, batch_x, batch_y)
     metrics = jax.device_get(metrics)
-    eval_summary = jax.tree_map(lambda x: x.item(), metrics)
+    eval_summary = jax.tree_utils.tree_map(lambda x: x.item(), metrics)
     return eval_summary["loss"], eval_summary["accuracy"]
 
 

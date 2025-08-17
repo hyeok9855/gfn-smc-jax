@@ -143,7 +143,7 @@ def build_metropolis(
 #             log_threshold = - jax.random.exponential(key2, shape=point.x.shape[:1])
 #
 #             accept = (log_p_accept > log_threshold) & jnp.isfinite(new_point.log_q) & jnp.isfinite(new_point.log_p)
-#             point = jax.tree_map(lambda a, b: broadcasted_where(accept, a, b), new_point, point)
+#             point = jax.tree_utils.tree_map(lambda a, b: broadcasted_where(accept, a, b), new_point, point)
 #             mean_p_accept = jnp.mean(jnp.clip(jnp.exp(log_p_accept), a_max=1))
 #
 #         # Info for logging

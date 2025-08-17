@@ -209,7 +209,7 @@ def build_fab_with_buffer_init_step_fns(
         )
         # Update info.
         for i in range(n_updates_per_smc_forward_pass):
-            info.update(jax.tree_map(lambda x: x[i], infos))
+            info.update(jax.tree_utils.tree_map(lambda x: x[i], infos))
 
         # Run smc and add samples to the buffer. Note this is done with the flow params before they were updated so that
         # this can occur in parallel (jax will do this after compilation).
