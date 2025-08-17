@@ -122,7 +122,7 @@ def ais_inner_transition(
     # Remove invalid samples.
     valid_samples = jax.vmap(point_is_valid_fn)(new_point)
     info.update(n_valid_samples=jnp.sum(valid_samples))
-    new_point = jax.tree_utils.tree_map(
+    new_point = jax.tree_util.tree_map(
         lambda a, b: broadcasted_where(valid_samples, a, b), new_point, point
     )
 
@@ -145,10 +145,10 @@ def replace_invalid_samples_with_valid_ones(
     indices = jax.random.choice(
         key, jnp.arange(valid_samples.shape[0]), p=p, shape=valid_samples.shape
     )
-    alt_points = jax.tree_utils.tree_map(lambda x: x[indices], point)
+    alt_points = jax.tree_util.tree_map(lambda x: x[indices], point)
 
     # Replace invalid samples with valid samples
-    point = jax.tree_utils.tree_map(
+    point = jax.tree_util.tree_map(
         lambda a, b: broadcasted_where(valid_samples, a, b), point, alt_points
     )
     return point
@@ -305,7 +305,7 @@ def build_smc(
                 info.update(
                     {
                         f"dist{i + 1}_" + key: value
-                        for key, value in jax.tree_utils.tree_map(lambda x: x[i], infos).items()
+                        for key, value in jax.tree_util.tree_map(lambda x: x[i], infos).items()
                     }
                 )
         log_ess_q_p = log_effective_sample_size(point0.log_p - point0.log_q)
@@ -417,7 +417,7 @@ def build_smc(
                 info.update(
                     {
                         f"dist{i + 1}_" + key: value
-                        for key, value in jax.tree_utils.tree_map(lambda x: x[i], infos).items()
+                        for key, value in jax.tree_util.tree_map(lambda x: x[i], infos).items()
                     }
                 )
         log_ess_q_p = log_effective_sample_size(point0.log_p - point0.log_q)

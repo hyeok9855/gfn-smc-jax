@@ -167,7 +167,7 @@ def build_prioritised_buffer(
         indices = (jnp.arange(batch_size) + buffer_state.current_index) % max_length
 
         # Remove invalid samples.
-        x, log_w, log_q = jax.tree_utils.tree_map(
+        x, log_w, log_q = jax.tree_util.tree_map(
             lambda a, b: broadcasted_where(valid_samples, a, b),
             (x, log_w, log_q),
             (
@@ -226,7 +226,7 @@ def build_prioritised_buffer(
     ) -> Iterable[Tuple[chex.Array, chex.Array, chex.Array]]:
         """Returns dataset with n-batches on the leading axis."""
         x, log_q_old, indices = sample(key, buffer_state, batch_size * n_batches)
-        dataset = jax.tree_utils.tree_map(
+        dataset = jax.tree_util.tree_map(
             lambda x: x.reshape((n_batches, batch_size, *x.shape[1:])), (x, log_q_old, indices)
         )
         return dataset
@@ -246,7 +246,7 @@ def build_prioritised_buffer(
         valid_adjustment = jnp.isfinite(log_w_adjustment) & jnp.isfinite(log_q)
         log_w = buffer_state.data.log_w[indices] + log_w_adjustment
         # remove invalid samples
-        log_w, log_q = jax.tree_utils.tree_map(
+        log_w, log_q = jax.tree_util.tree_map(
             partial(broadcasted_where, valid_adjustment),
             (log_w, log_q),
             (-jnp.ones_like(log_w) * jnp.inf, jnp.zeros_like(log_q)),

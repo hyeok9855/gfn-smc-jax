@@ -126,7 +126,7 @@ def main(config):
 
         print("Param shapes:")
 
-        print(jax.tree_utils.tree_map(lambda x: x.shape, params))
+        print(jax.tree_util.tree_map(lambda x: x.shape, params))
 
         key, key_gen = jax.random.split(key_gen)
         x_re = recons_fn(params, key, x)

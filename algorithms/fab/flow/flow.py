@@ -235,7 +235,7 @@ def create_flow(recipe: FlowRecipe) -> Flow:
         key1, key2 = jax.random.split(seed)
         params_base = base_log_prob_fn.init(key1, sample)
         params_bijector_single = inverse_and_log_det_single.init(key2, sample)
-        params_bijectors = jax.tree_utils.tree_map(
+        params_bijectors = jax.tree_util.tree_map(
             lambda x: jnp.repeat(x[None, ...], recipe.n_layers, axis=0), params_bijector_single
         )
         return FlowParams(base=params_base, bijector=params_bijectors)

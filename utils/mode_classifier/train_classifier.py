@@ -138,7 +138,7 @@ def main(config):
         logpx_fn, recons_fn, sample_fn = forward.apply
 
         print("Param shapes:")
-        print(jax.tree_utils.tree_map(lambda x: x.shape, params))
+        print(jax.tree_util.tree_map(lambda x: x.shape, params))
 
         x_re = recons_fn(params, next(rng_seq), x)
         print(f"Recons Error: {((x - x_re)**2).mean()}")

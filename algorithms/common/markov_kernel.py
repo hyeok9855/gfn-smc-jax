@@ -35,11 +35,11 @@ class InterpolatedStepSize(object):
 
 def tree_add(tree_a, tree_b):
     assert_trees_all_equal_shapes(tree_a, tree_b)
-    return jax.tree_utils.tree_map(lambda a, b: a + b, tree_a, tree_b)
+    return jax.tree_util.tree_map(lambda a, b: a + b, tree_a, tree_b)
 
 
 def tree_scalar_mul(tree, scalar):
-    res = jax.tree_utils.tree_map(lambda x: x * scalar, tree)
+    res = jax.tree_util.tree_map(lambda x: x * scalar, tree)
     assert_trees_all_equal_shapes(tree, res)
     return res
 
