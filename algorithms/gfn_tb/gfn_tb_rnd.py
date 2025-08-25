@@ -32,7 +32,7 @@ def per_sample_rnd_pinned_brownian(
     target_log_prob = target.log_prob
 
     sigmas = noise_schedule
-    scaled_target_log_prob = lambda x, t: target_log_prob(x)
+    scaled_target_log_prob = lambda x, t: t * target_log_prob(x)
     dt = 1.0 / num_steps
 
     def simulate_prior_to_target(state, per_step_input):
