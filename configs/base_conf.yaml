@@ -17,7 +17,7 @@ moving_average:  # Moving average over subsequent evaluations
 discrepancies: [sd, mmd]  # IPMs: Sinkhorn (Entropy-regularized Wasserstein Distance) and Maximum Mean Discrepancy
 compute_emc: True  # Entropic Mode Coverage
 compute_forward_metrics: True
-use_wandb: False
+use_wandb: True
 verbose: True  # Intermediate results are printed if True
 visualize_samples: True  # Samples are visualized if target density permitts
 save_samples: False  # Save samples with highest ELBO

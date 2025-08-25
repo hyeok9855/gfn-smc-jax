@@ -19,7 +19,7 @@ def init_model(key, dim, alg_cfg):
         jnp.ones([alg_cfg.batch_size, dim]),
     )
 
-    if alg_cfg.name == "gfn":
+    if alg_cfg.name == "gfn_tb" and alg_cfg.loss_type == "tb":
         additional_params = {"logZ": jnp.array((alg_cfg.init_logZ,))}
         params["params"] = {**params["params"], **additional_params}
 

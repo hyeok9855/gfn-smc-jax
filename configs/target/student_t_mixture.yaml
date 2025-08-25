@@ -69,7 +69,7 @@ scld:
   n_sub_traj: 128
 
 pis: # Path Integral Sampler
-  max_diffusion: 60. # Divided by 4 roughly gives the initial scale
+  max_diffusion: 15.
   step_size: 5e-4
 
 dis: # Time-reversed Diffusion Sampler
@@ -80,8 +80,8 @@ dds: # Denoising Diffusion Sampler
   initial_scale: 15.
   step_size: 5e-4
 
-gfn: # Generative Flow Networks
-  max_diffusion: 60. # Divided by 4 roughly gives the initial scale
+gfn_tb: # Generative Flow Networks
+  max_diffusion: 15.
   step_size: 5e-4
 
 gbs:  # General Bridge Sampler

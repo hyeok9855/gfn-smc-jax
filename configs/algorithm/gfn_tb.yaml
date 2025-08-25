@@ -1,0 +1,24 @@
+# Generative Flow Networks (GFN) with Trajectory Balance (TB) loss
+name: gfn_tb
+step_size: ${target.gfn_tb.step_size}
+batch_size: ${target.all.batch_size}
+iters: 40000
+num_steps: 128
+loss_type: "tb"  # lv or tb
+grad_clip: 1.
+init_logZ: ${target.gfn_tb.init_logZ}
+logZ_step_size: ${target.gfn_tb.logZ_step_size}
+reference_process: pinned_brownian  # ou or pinned_brownian
+max_diffusion: ${target.gfn_tb.max_diffusion}  # for pinned_brownian
+init_std: ${target.gfn_tb.initial_scale}  # for ou
+
+defaults:
+  - model: pisgrad_net
+  - noise_schedule: const
+
+model:
+  bias_init: 0.  # Initialization of the last layers' bias of the time-dependent network
+  weight_init: 1e-8  # Initialization of the last layers' weights of the time-dependent network
+
+noise_schedule:
+  reverse: False

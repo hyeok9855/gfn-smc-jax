@@ -54,7 +54,7 @@ cmcd:  # Controlled Monte Carlo Diffusions
   step_size: 5e-4
 
 pis: # Path Integral Sampler
-  max_diffusion: 4. # Divided by 4 roughly gives the initial scale
+  max_diffusion: 1.
   step_size: 5e-4
 
 dis: # Time-reversed Diffusion Sampler
@@ -65,8 +65,8 @@ dds: # Denoising Diffusion Sampler
   initial_scale: 1.
   step_size: 5e-4
 
-gfn: # Generative Flow Networks
-  max_diffusion: 4. # Divided by 4 roughly gives the initial scale
+gfn_tb: # Generative Flow Networks
+  max_diffusion: 1.
   step_size: 5e-4
 
 gbs:  # General Bridge Sampler

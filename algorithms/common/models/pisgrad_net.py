@@ -116,6 +116,7 @@ class PISGRADNet(nn.Module):
         self.time_coder_grad = nn.Sequential(
             [nn.Dense(self.num_hid)]
             + [nn.Sequential([nn.gelu, nn.Dense(self.num_hid)]) for _ in range(self.num_layers)]
+            + [nn.gelu]
             + [
                 nn.Dense(
                     self.dim,

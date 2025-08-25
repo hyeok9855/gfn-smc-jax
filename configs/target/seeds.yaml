@@ -68,7 +68,7 @@ dds: # Denoising Diffusion Sampler
   step_size: 1e-4
 
 pis: # Path Integral Sampler
-  max_diffusion: 4. # Divided by 4 roughly gives the initial scale
+  max_diffusion: 1.
   step_size: 1e-3
 
 dis: # Time-reversed Diffusion Sampler

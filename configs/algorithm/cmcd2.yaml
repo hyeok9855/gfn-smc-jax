@@ -29,4 +29,3 @@ noise_schedule:
 buffer:
   use_buffer: False
   num_buffer_batches: 20
-

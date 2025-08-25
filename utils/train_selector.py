@@ -60,7 +60,7 @@ def get_train_fn(alg_name):
         return cmcd_trainer
 
     elif alg_name == "scld":
-        from algorithms.scld.scld import scld_trainer
+        from algorithms.scld.scld_trainer import scld_trainer
 
         return scld_trainer
 
@@ -89,10 +89,10 @@ def get_train_fn(alg_name):
 
         return dds_trainer
 
-    elif alg_name == "gfn":
-        from algorithms.gfn.gfn_trainer import gfn_trainer
+    elif alg_name == "gfn_tb":
+        from algorithms.gfn_tb.gfn_tb_trainer import gfn_tb_trainer
 
-        return gfn_trainer
+        return gfn_tb_trainer
 
     elif alg_name == "gbs":
         from algorithms.gbs.gbs_trainer import gbs_trainer

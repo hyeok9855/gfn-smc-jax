@@ -16,7 +16,7 @@ defaults:
   - noise_schedule: cosine
 
 model:
-  bias_init: 1.
+  bias_init: 0.
   weight_init: 1e-8
 
 noise_schedule:

@@ -185,3 +185,6 @@ utils/images
 utils/diffusion_gif.gif
 utils/prior_gif.gif
 /checkpoints/
+
+# VSCode
+.vscode/

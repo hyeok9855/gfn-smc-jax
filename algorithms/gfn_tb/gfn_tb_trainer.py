@@ -1,6 +1,6 @@
 """
-Code for Generative Flow Networks (GFN).
-For further details see: https://arxiv.org/abs/2301.12594
+Code for Trajectory Balance (TB) training.
+For further details see: https://arxiv.org/abs/2301.12594 and https://arxiv.org/abs/2501.06148
 """
 
 from functools import partial
@@ -13,40 +13,43 @@ import wandb
 
 from algorithms.common.diffusion_related.init_model import init_model
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
-from algorithms.gfn.gfn_rnd import log_variance, neg_elbo, rnd, trajectory_balance
+from algorithms.gfn_tb.gfn_tb_rnd import rnd, loss_fn
 from eval.utils import extract_last_entry
 from utils.print_utils import print_results
 
 
-def gfn_trainer(cfg, target):
+def gfn_tb_trainer(cfg, target):
     key_gen = jax.random.PRNGKey(cfg.seed)
     dim = target.dim
     alg_cfg = cfg.algorithm
 
     # Define initial and target density
-    normal_log_prob = lambda x, sigma: distrax.MultivariateNormalDiag(
-        jnp.zeros(dim), jnp.ones(dim) * sigma
-    ).log_prob(x)
-    aux_tuple = (dim, normal_log_prob)
-    target_log_prob = target.log_prob
+    if alg_cfg.reference_process == "pinned_brownian":  # Following PIS
+        normal_log_prob = lambda x, sigma: distrax.MultivariateNormalDiag(
+            jnp.zeros(dim), jnp.ones(dim) * sigma
+        ).log_prob(x)
+        aux_tuple = (dim, normal_log_prob)
+    elif alg_cfg.reference_process == "ou":
+        initial_dist = distrax.MultivariateNormalDiag(  # Following DIS
+            jnp.zeros(dim), jnp.ones(dim) * alg_cfg.init_std
+        )
+        aux_tuple = (alg_cfg.init_std, initial_dist.sample, initial_dist.log_prob)
+    else:
+        raise ValueError(f"Reference process {alg_cfg.reference_process} not supported.")
+
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
     # Initialize the model
     key, key_gen = jax.random.split(key_gen)
     model_state = init_model(key, dim, alg_cfg)
 
-    if alg_cfg.loss == "elbo":
-        loss_fn = neg_elbo
-    elif alg_cfg.loss == "lv":
-        loss_fn = log_variance
-    elif alg_cfg.loss == "tb":
-        loss_fn = trajectory_balance
-    else:
-        return ValueError(f"No loss function named {alg_cfg.loss}.")
-
-    loss = jax.jit(jax.grad(loss_fn, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
-    rnd_short = partial(
+    loss = jax.jit(
+        jax.grad(loss_fn, 2, has_aux=True),
+        static_argnums=(3, 4, 5, 6, 7, 8, 9),
+    )
+    rnd_partial = partial(
         rnd,
+        reference_process=alg_cfg.reference_process,
         batch_size=cfg.eval_samples,
         aux_tuple=aux_tuple,
         target=target,
@@ -54,8 +57,7 @@ def gfn_trainer(cfg, target):
         noise_schedule=cfg.algorithm.noise_schedule,
         stop_grad=True,
     )
-
-    eval_fn, logger = get_eval_fn(rnd_short, target, target_samples, cfg)
+    eval_fn, logger = get_eval_fn(rnd_partial, target, target_samples, cfg)
 
     eval_freq = max(alg_cfg.iters // cfg.n_evals, 1)
     timer = 0
@@ -66,6 +68,8 @@ def gfn_trainer(cfg, target):
             key,
             model_state,
             model_state.params,
+            alg_cfg.loss_type,
+            alg_cfg.reference_process,
             alg_cfg.batch_size,
             aux_tuple,
             target,

@@ -35,7 +35,6 @@ from algorithms.scld.scld_utils import (
     make_lr_scheduler,
     print_results,
 )
-from eval import discrepancies
 
 Array = tp.Array
 FlowApply = tp.FlowApply

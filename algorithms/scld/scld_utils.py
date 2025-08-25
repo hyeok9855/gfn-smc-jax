@@ -70,16 +70,18 @@ def log_prob_kernel(x, mean, scale):
 
 def print_results(step, logger, config):
     if config.verbose:
+        string = f"Step {int(step)}: ELBO w. SMC {float(logger['metric/smc_ELBO']):.4f}; "
+        string += f"IW-ELBO w. SMC {float(logger['metric/smc_lnZ']):.4f}; "
+        string += f"SD w. SMC {float(logger['discrepancies/smc_sd']):.4f}; "
+        string += "\n\t"
+        string += f"ELBO w/o. SMC {float(logger['metric/model_ELBO']):.4f}; "
+        string += f"IW-ELBO w/o. SMC {float(logger['metric/model_lnZ']):.4f}; "
+        string += f"SD w/o. SMC {float(logger['discrepancies/model_sd']):.4f}; "
         try:
-            print(
-                f'Step {step}: ELBO w. SMC {logger["metric/smc_ELBO"]}; ΔlnZ {logger["metric/smc_delta_lnZ"]}'
-            )
-            print(
-                f'Step {step}: ELBO w/o. SMC {logger["metric/model_ELBO"]}; ΔlnZ {logger["metric/model_delta_lnZ"]}'
-            )
+            string += f"ESS w/o. SMC {float(logger['metric/model_ess']):.6f}; "
         except:
-            print(f'Step {step}: ELBO w. SMC {logger["metric/smc_ELBO"]}')
-            print(f'Step {step}: ELBO w/o. SMC {logger["metric/model_ELBO"]}')
+            pass
+        print(string)
 
 
 def flattened_traversal(fn):

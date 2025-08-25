@@ -24,17 +24,15 @@ def dis_trainer(cfg, target):
     alg_cfg = cfg.algorithm
 
     # Define initial and target density
-    initial_density = distrax.MultivariateNormalDiag(
+    initial_dist = distrax.MultivariateNormalDiag(
         jnp.zeros(dim), jnp.ones(dim) * alg_cfg.init_std
     )
-    aux_tuple = (alg_cfg.init_std, initial_density.sample, initial_density.log_prob)
+    aux_tuple = (alg_cfg.init_std, initial_dist.sample, initial_dist.log_prob)
     target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
     # Initialize the model
     key, key_gen = jax.random.split(key_gen)
     model_state = init_model(key, dim, alg_cfg)
-
-    noise_schedule = alg_cfg.noise_schedule
 
     loss = jax.jit(jax.grad(neg_elbo, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
     rnd_short = partial(
