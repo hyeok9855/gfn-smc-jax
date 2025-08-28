@@ -65,7 +65,6 @@ def eval_scld(simulate, simulate_smc, get_schedule_and_prior_fn, target, target_
 
         (
             model_samples_all,
-            _,
             (model_lnz_est, model_elbo_est),
             (_, per_subtraj_rnds),
             subtrajs_model,
@@ -73,7 +72,6 @@ def eval_scld(simulate, simulate_smc, get_schedule_and_prior_fn, target, target_
         ) = simulate(key, model_state, params)
         (
             smc_samples_all,
-            _,
             (smc_lnz_est, smc_elbo_est),
             (_, per_subtraj_rnds_smc),
             subtrajs_smc,

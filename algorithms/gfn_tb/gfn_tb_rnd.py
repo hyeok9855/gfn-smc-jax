@@ -218,4 +218,4 @@ def loss_fn(
     else:  # loss_type == "lv"
         losses = log_ratio - jnp.mean(log_ratio)
 
-    return jnp.mean(jnp.square(losses)), (losses, samples)
+    return jnp.mean(jnp.square(losses)), (-log_ratio, samples)

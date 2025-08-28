@@ -40,14 +40,13 @@ def dds_trainer(cfg, target):
     key, key_gen = jax.random.split(key_gen)
     model_state = init_model(key, dim, alg_cfg)
 
-    loss = jax.jit(jax.grad(neg_elbo, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7))
+    loss = jax.jit(jax.grad(neg_elbo, 2, has_aux=True), static_argnums=(3, 4, 5, 6))
     rnd_short = partial(
         rnd,
         batch_size=cfg.eval_samples,
         initial_density_tuple=aux_tuple,
         target=target,
         num_steps=cfg.algorithm.num_steps,
-        noise_schedule=cfg.algorithm.noise_schedule,
         stop_grad=True,
     )
 
@@ -66,7 +65,6 @@ def dds_trainer(cfg, target):
             aux_tuple,
             target,
             alg_cfg.num_steps,
-            alg_cfg.noise_schedule,
         )
         timer += time() - iter_time
 

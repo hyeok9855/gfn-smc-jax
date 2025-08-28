@@ -23,7 +23,6 @@ def per_sample_rnd(
     initial_density_tuple,
     target,
     num_steps,
-    noise_schedule,
     stop_grad=False,
     prior_to_target=True,
 ):
@@ -136,7 +135,6 @@ def rnd(
     initial_density_tuple,
     target,
     num_steps,
-    noise_schedule,
     stop_grad=False,
     prior_to_target=True,
 ):
@@ -150,7 +148,6 @@ def rnd(
         initial_density_tuple,
         target,
         num_steps,
-        noise_schedule,
         stop_grad,
         prior_to_target,
     )
@@ -166,7 +163,6 @@ def neg_elbo(
     initial_density,
     target_density,
     num_steps,
-    noise_schedule,
     stop_grad=False,
 ):
     aux = rnd(
@@ -177,7 +173,6 @@ def neg_elbo(
         initial_density,
         target_density,
         num_steps,
-        noise_schedule,
         stop_grad,
     )
     samples, running_costs, _, terminal_costs = aux

@@ -159,34 +159,19 @@ def inner_step_simulate(
         resampler=config.resampler,
         use_markov=use_mcmc,
         resample_threshold=config.resample_threshold,
-        log_density_per_step=log_density_per_step,
     )
 
     next_samples = jax.lax.stop_gradient(next_samples)
-    if config.use_markov:
-        target_log_probs = log_density_per_step(sub_traj_end_point[0], next_samples)[:, None]
 
-    if batchsize_override or (not config.buffer.use_buffer):
+    return (
+        next_samples,
+        next_log_weights,
+        increments,
+        log_is_weights,
         # memory saver hack, don't return the sub-trajectories if not needed
-        return (
-            next_samples,
-            next_log_weights,
-            increments,
-            target_log_probs,
-            log_is_weights,
-            None,
-            debug_tuple,
-        )
-    else:
-        return (
-            next_samples,
-            next_log_weights,
-            increments,
-            target_log_probs,
-            log_is_weights,
-            model_subtrajectories,
-            debug_tuple,
-        )
+        None if batchsize_override or (not config.buffer.use_buffer) else model_subtrajectories,
+        debug_tuple,
+    )
 
 
 def simulate(
@@ -211,9 +196,9 @@ def simulate(
     markov_kernel_apply = markov_kernel_apply(log_density_per_step, beta_fn)
     (
         n_sub_traj,
-        sub_traj_start_points,
-        sub_traj_end_points,
-        sub_traj_indices,
+        sub_traj_start_points,  # [0, 1*subtraj_length, 2*subtraj_length, ...]
+        sub_traj_end_points,  # [1*subtraj_length, 2*subtraj_length, 3*subtraj_length, ...]
+        sub_traj_indices,  # [0, 1, 2, ...]
         sub_traj_length,
     ) = traj
 
@@ -249,7 +234,6 @@ def simulate(
             next_samples,
             next_log_weights,
             increments,
-            target_log_probs,
             log_is_weights,
             subtrajectories,
             (pre_resample_logweights,),
@@ -271,7 +255,6 @@ def simulate(
         per_step_output = (
             next_samples,
             increments,
-            target_log_probs,
             log_is_weights,
             subtrajectories,
             (
@@ -289,7 +272,6 @@ def simulate(
     (
         samples,
         (lnz_incs, elbo_incs),
-        sub_traj_target_log_probs,
         sub_traj_log_is_weights,
         sub_trajs,
         log_ess_per_subtraj,
@@ -298,7 +280,6 @@ def simulate(
 
     return (
         jnp.concatenate([jnp.expand_dims(initial_samples, 0), samples], axis=0),
-        jnp.concatenate([jnp.ones((1, batch_size)), sub_traj_target_log_probs[:, :, 0]], axis=0),
         (lnz, elbo),
         (final_state, sub_traj_log_is_weights),
         sub_trajs,
@@ -434,8 +415,6 @@ def scld_trainer(cfg, target):
         else:
             params_to_freeze.append("prior_mean")
 
-    prior_lr = 0 if not hasattr(alg_cfg, "prior") else alg_cfg.prior.lr
-
     # learning the max diffusion
     additional_params["log_max_diffusion"] = jnp.log(alg_cfg.max_diffusion)
 
@@ -468,7 +447,7 @@ def scld_trainer(cfg, target):
             mask=flattened_traversal(lambda path, _: path[-1] in ["betas"]),
         ),
         optax.masked(
-            optax.adam(learning_rate=prior_lr),
+            optax.adam(learning_rate=alg_cfg.prior.lr),
             mask=flattened_traversal(lambda path, _: path[-1] in learnt_prior_params),
         ),
         optax.masked(
@@ -569,7 +548,6 @@ def scld_trainer(cfg, target):
 
             (
                 sim_samples,
-                sub_traj_target_log_probs,
                 (lnz_est, elbo_est),
                 ((final_samples, final_weights), sub_traj_logrnds),
                 sub_trajs,
@@ -608,7 +586,6 @@ def scld_trainer(cfg, target):
         def lv_loss(key, model_state, params):
             (
                 sim_samples,
-                sub_traj_target_log_probs,
                 (lnz_est, elbo_est),
                 ((final_samples, final_weights), sub_traj_logrnds),
                 sub_trajs,
@@ -663,7 +640,6 @@ def scld_trainer(cfg, target):
         )
         (
             init_samples,
-            sub_traj_target_log_probs,
             (lnz_est, elbo_est),
             (_, log_rnds),
             inital_subtrajs,
@@ -720,7 +696,6 @@ def scld_trainer(cfg, target):
             key, key_gen = jax.random.split(key_gen)
             (
                 sim_samples,
-                sub_traj_target_log_probs,
                 (lnz_est, elbo_est),
                 ((final_samples, final_weights), sub_traj_logrnds),
                 sub_trajs,
@@ -779,7 +754,7 @@ def scld_trainer(cfg, target):
 
                 if alg_cfg.buffer.update_weights:
                     # update buffer weights as in training-with-buffer algorithm
-                    logw_update = recomputed_logws[:, : buffer_indices.shape[1], 0]
+                    logw_update = recomputed_logws[:, : buffer_indices.shape[1], 0]  # type: ignore
                     buffer_state = buffer.upd_weights(logw_update, buffer_indices, buffer_state)
 
                 model_state = gradient_step(model_state, grads_all)

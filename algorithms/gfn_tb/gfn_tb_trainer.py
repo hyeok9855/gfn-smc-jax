@@ -13,6 +13,7 @@ import wandb
 
 from algorithms.common.diffusion_related.init_model import init_model
 from algorithms.common.eval_methods.stochastic_oc_methods import get_eval_fn
+from algorithms.gfn_tb.buffer import build_terminal_state_buffer
 from algorithms.gfn_tb.gfn_tb_rnd import rnd, loss_fn
 from eval.utils import extract_last_entry
 from utils.print_utils import print_results
@@ -22,6 +23,8 @@ def gfn_tb_trainer(cfg, target):
     key_gen = jax.random.PRNGKey(cfg.seed)
     dim = target.dim
     alg_cfg = cfg.algorithm
+
+    target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
 
     # Define initial and target density
     if alg_cfg.reference_process == "pinned_brownian":  # Following PIS
@@ -37,17 +40,22 @@ def gfn_tb_trainer(cfg, target):
     else:
         raise ValueError(f"Reference process {alg_cfg.reference_process} not supported.")
 
-    target_samples = target.sample(jax.random.PRNGKey(0), (cfg.eval_samples,))
+    # Initialize the buffer
+    buffer = None
+    if alg_cfg.buffer.use_buffer:
+        buffer = build_terminal_state_buffer(
+            dim,
+            alg_cfg.buffer.max_length_in_batches * alg_cfg.batch_size,
+            sample_with_replacement=alg_cfg.buffer.sample_with_replacement,
+        )
 
     # Initialize the model
     key, key_gen = jax.random.split(key_gen)
     model_state = init_model(key, dim, alg_cfg)
 
-    loss = jax.jit(
-        jax.grad(loss_fn, 2, has_aux=True),
-        static_argnums=(3, 4, 5, 6, 7, 8, 9),
-    )
-    rnd_partial = partial(
+    loss_fn_jit = jax.jit(jax.grad(loss_fn, 2, has_aux=True), static_argnums=(3, 4, 5, 6, 7, 8, 9))
+
+    rnd_partial_for_eval = partial(
         rnd,
         reference_process=alg_cfg.reference_process,
         batch_size=cfg.eval_samples,
@@ -57,14 +65,15 @@ def gfn_tb_trainer(cfg, target):
         noise_schedule=cfg.algorithm.noise_schedule,
         stop_grad=True,
     )
-    eval_fn, logger = get_eval_fn(rnd_partial, target, target_samples, cfg)
+    eval_fn, logger = get_eval_fn(rnd_partial_for_eval, target, target_samples, cfg)
 
     eval_freq = max(alg_cfg.iters // cfg.n_evals, 1)
     timer = 0
     for step in range(alg_cfg.iters):
+        # Do sample & learn
         key, key_gen = jax.random.split(key_gen)
         iter_time = time()
-        grads, _ = loss(
+        grads, (log_iws, samples) = loss_fn_jit(
             key,
             model_state,
             model_state.params,

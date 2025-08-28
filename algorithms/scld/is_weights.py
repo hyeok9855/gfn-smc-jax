@@ -309,7 +309,6 @@ def update_samples_log_weights(
     resampler,
     use_markov: bool,
     resample_threshold: float,
-    log_density_per_step,
 ):
     """
     Applies Resampling and MCMC steps

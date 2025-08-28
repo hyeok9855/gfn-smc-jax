@@ -34,6 +34,7 @@ class PrioritisedBufferState(NamedTuple):
 class InitFn(Protocol):
     def __call__(self, x: chex.Array, log_w: chex.Array, on_cpu: bool) -> PrioritisedBufferState:
         """Initialise the buffer state, by filling it above `min_sample_length`."""
+        ...
 
 
 class AddFn(Protocol):
@@ -41,6 +42,7 @@ class AddFn(Protocol):
         self, x: chex.Array, log_w: chex.Array, buffer_state: PrioritisedBufferState
     ) -> PrioritisedBufferState:
         """Update the buffer's state with a new batch of data."""
+        ...
 
 
 class SampleFn(Protocol):
@@ -58,6 +60,8 @@ class SampleFn(Protocol):
             indices: Indices of samples for their location in the buffer state.
         """
 
+        ...
+
 
 class SampleNBatchesFn(Protocol):
     def __call__(
@@ -68,6 +72,7 @@ class SampleNBatchesFn(Protocol):
         n_batches: int,
     ) -> Iterable[Tuple[chex.Array, chex.Array, chex.Array]]:
         """Returns dataset with n-batches on the leading axis. See `SampleFn`."""
+        ...
 
 
 class AdjustFn(Protocol):
@@ -76,10 +81,11 @@ class AdjustFn(Protocol):
         log_w_new: chex.Array,
         indices: chex.Array,
         buffer_state: PrioritisedBufferState,
-        subtraj_id: int = None,
+        subtraj_id: int | None = None,
     ) -> PrioritisedBufferState:
         """Adjust log weights to match new value of theta, this is typically performed
         over minibatches, rather than over the whole dataset at once."""
+        ...
 
 
 class PrioritisedBuffer(NamedTuple):
@@ -89,4 +95,4 @@ class PrioritisedBuffer(NamedTuple):
     sample_n_batches: SampleNBatchesFn
     min_lengtht_to_sample: int
     max_length: int
-    upd_weights: AdjustFn = None
+    upd_weights: AdjustFn
