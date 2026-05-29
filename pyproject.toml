@@ -1,0 +1,32 @@
+[project]
+name = "reinforced-smc"
+version = "0.1.0"
+description = "Reinforced Sequential Monte Carlo for Amortised Sampling"
+readme = "README.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "jax==0.6.2",
+    "jaxlib==0.6.2",
+    "tensorflow==2.16.1",
+    "numpyro==0.14.0",
+    "flax==0.10.7",
+    "tqdm==4.66.1",
+    "hydra-core==1.3.2",
+    "hydra-joblib-launcher==1.2.0",
+    "hydra-submitit-launcher==1.2.0",
+    "wandb==0.27.0",
+    "ml-collections==0.1.1",
+    "ott-jax==0.4.6",
+    "tensorflow-probability==0.24.0",
+    "dm-haiku==0.0.12",
+    "distrax==0.1.5",
+    "mergedeep==1.3.4",
+    "matplotlib==3.8.4",
+    "pandas==2.1.0",
+]
+
+[tool.uv]
+dev-dependencies = []
+override-dependencies = [
+    "ml-dtypes==0.5.4",
+]

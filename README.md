@@ -8,30 +8,15 @@ For ALDP experiments, please refer to the [PyTorch version](https://github.com/h
 For the biochemical sequence design with prepend/append models, please refer to the gfn-discrete folder of the [gfn-is](https://github.com/hyeok9855/gfn-is) repository.
 
 ## Installation
-- python 3.10.14
-- jax 0.6.2
 
-We recommend using the conda (or mamba) environment to install the dependencies.
+We recommend using [uv](https://github.com/astral-sh/uv) to install dependencies and run the project.
+
+First, synchronize the dependencies to set up a virtual environment:
 ```bash
-conda create -n gfn-smc-jax python=3.10.14
-conda activate gfn-smc-jax
+uv sync
 ```
 
-Install tensorflow first since it sometimes causes conflicts with other packages.
-```bash
-pip install tensorflow==2.16.1
-```
-
-Install the jax and jaxlib with the appropriate CUDA version or TPU support, e.g., cuda12
-```bash
-pip install -U "jax[cuda12]==0.6.2"
-```
-
-Install the other dependencies.
-```bash
-pip install -r requirements.txt
-```
-
+This will automatically create a virtual environment (`.venv`) and install all required packages (including JAX and TensorFlow) with matching versions.
 
 ## Usage
 
@@ -39,8 +24,9 @@ Here we mainly focus on the GFlowNet-based algorithms.
 
 Basic usage:
 ```bash
-python run.py algorithm=<algorithm_name> target=<target_name>
+uv run python run.py algorithm=<algorithm_name> target=<target_name>
 ```
+
 
 `<algorithm_name>` can be one of the following:
 - `gfn_tb` (for TB or LV loss with importance-weighted buffer (IW-Buf; section 3.3))
