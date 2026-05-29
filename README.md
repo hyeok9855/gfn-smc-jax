@@ -4,7 +4,7 @@ This repository contains the code for the paper "[Reinforced sequential Monte Ca
 
 This repository builds upon the [repository](https://github.com/DenisBless/variational_sampling_methods) of the paper "[Beyond ELBOs: A Large-Scale Evaluation of Variational Methods for Sampling](https://arxiv.org/abs/2406.07423)" by Denis Blessing et al. (2024). We correct the GFlowNet implementation of the original repository and incorporate sequential Monte Carlo to it.
 
-For ALDP experiments, please refer to the [PyTorch version](https://github.com/hyeok9855/gfn-smc-torch) of this project.
+For ALDP experiments, please refer to the [PyTorch version](https://github.com/hyeok9855/ReinforcedSMC-Torch) of this project.
 For the biochemical sequence design with prepend/append models, please refer to the gfn-discrete folder of the [gfn-is](https://github.com/hyeok9855/gfn-is) repository.
 
 ## Installation
