@@ -1,6 +1,6 @@
-# Reinforced sequential Monte Carlo for amortised sampling
+# Reinforced Sequential Monte Carlo for Amortised Sampling
 
-This repository contains the code for the paper "[Reinforced sequential Monte Carlo for amortised sampling](https://arxiv.org/abs/2510.11711)".
+This repository contains the code for the paper "[Reinforced Sequential Monte Carlo for Amortised Sampling](https://arxiv.org/abs/2510.11711)" (ICML 2026 spotlight).
 
 This repository builds upon the [repository](https://github.com/DenisBless/variational_sampling_methods) of the paper "[Beyond ELBOs: A Large-Scale Evaluation of Variational Methods for Sampling](https://arxiv.org/abs/2406.07423)" by Denis Blessing et al. (2024). We correct the GFlowNet implementation of the original repository and incorporate sequential Monte Carlo to it.
 
@@ -67,17 +67,15 @@ For CMCD and SCLD baselines, please refer to the [repository of SCLD](https://gi
 
 Please refer to our paper for more details on the algorithms and targets.
 
-Full run scripts will be uploaded upon the acceptance of the paper.
-
 ## Citation
 
 If you use parts of this repository in your work, please cite us using the following BibTeX entry:
 
 ```bibtex
-@article{choi2025reinforced,
-  title={Reinforced sequential {M}onte {C}arlo for amortised sampling},
-  author={Choi, Sanghyeok and Mittal, Sarthak and Elvira, V{\'\i}ctor and Park, Jinkyoo and Malkin, Nikolay},
-  journal={arXiv preprint arXiv:2510.11711},
-  year={2025}
+@inproceedings{choi2026reinforced,
+  title={Reinforced Sequential {M}onte {C}arlo for Amortised Sampling},
+  author={Choi, Sanghyeok and Mittal, Sarthak and Elvira, V{\'\i}ctor and Park, Jinkyoo and Whitammer, Esmeralda S.},
+  booktitle={Forty-third International Conference on Machine Learning},
+  year={2026}
 }
 ```
