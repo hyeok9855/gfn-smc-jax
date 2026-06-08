@@ -7,7 +7,7 @@ import distrax
 import flax.linen as nn
 import jax
 import jax.numpy as jnp
-import tensorflow_probability.substrates.jax as tfp
+
 
 from utils.helper import inverse_softplus
 
@@ -27,9 +27,8 @@ class UnconditionalAffine(distrax.Bijector):
         scale_logit, shift = self._get_params()
         if self._restrict_scaling:
             # Prevents any individual act norm layer doing a huge amount of scaling.
-            scale_logit_bijector = tfp.bijectors.Sigmoid(low=0.02, high=50.0)
-            scale_logit_init = scale_logit_bijector.inverse(1.0)
-            scale = scale_logit_bijector(scale_logit + scale_logit_init)
+            scale_logit_init = jax.scipy.special.logit((1.0 - 0.02) / (50.0 - 0.02))
+            scale = jax.nn.sigmoid(scale_logit + scale_logit_init) * (50.0 - 0.02) + 0.02
         else:
             scale = jax.nn.softplus(scale_logit + inverse_softplus(1.0))
         shift = shift

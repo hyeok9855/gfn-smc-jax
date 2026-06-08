@@ -30,7 +30,7 @@ def plot_contours_2D(
         return log_prob_func(_x)
 
     log_probs = sliced_log_prob(x_points)
-    log_probs = jnp.clip(log_probs, a_min=-1000, a_max=None)
+    log_probs = jnp.clip(log_probs, -1000, None)
     x1 = x_points[:, 0].reshape(n_points, n_points)
     x2 = x_points[:, 1].reshape(n_points, n_points)
     if log:

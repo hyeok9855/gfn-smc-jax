@@ -6,7 +6,7 @@ import chex
 import distrax
 import jax.nn
 import jax.numpy as jnp
-import tensorflow_probability.substrates.jax as tfp
+
 
 from algorithms.fab.flow.distrax_with_extra import (
     BijectorWithExtra,
@@ -68,9 +68,8 @@ def build_split_coupling_bijector(
             if transform_type == "real_nvp":
                 scale_logit, shift = jnp.split(params, 2, axis=-1)
                 if restrict_scale_rnvp:
-                    scale_logit_bijector = tfp.bijectors.Sigmoid(low=0.1, high=10.0)
-                    scale_logit_init = scale_logit_bijector.inverse(1.0)
-                    scale = scale_logit_bijector(scale_logit + scale_logit_init)
+                    scale_logit_init = jax.scipy.special.logit((1.0 - 0.1) / (10.0 - 0.1))
+                    scale = jax.nn.sigmoid(scale_logit + scale_logit_init) * (10.0 - 0.1) + 0.1
                 else:
                     scale = jax.nn.softplus(scale_logit + inverse_softplus(1.0))
                 return distrax.ScalarAffine(shift=shift, scale=scale)

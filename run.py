@@ -1,8 +1,8 @@
 import os
 from datetime import datetime
 
-import hydra
 import jax
+import hydra
 import matplotlib
 import wandb
 from omegaconf import DictConfig, OmegaConf
