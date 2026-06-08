@@ -20,13 +20,10 @@ This will automatically create a virtual environment (`.venv`) and install all r
 
 ## Usage
 
-Here we mainly focus on the GFlowNet-based algorithms. 
-
 Basic usage:
 ```bash
 uv run python run.py algorithm=<algorithm_name> target=<target_name>
 ```
-
 
 `<algorithm_name>` can be one of the following:
 - `gfn_tb` (for TB or LV loss with importance-weighted buffer (IW-Buf; section 3.3))
