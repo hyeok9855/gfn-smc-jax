@@ -1,7 +1,7 @@
 # Wandb
 wandb:
   entity: # Your identity here
-  project: sampling_bench
+  project: reinforced-smc
   resume: allow
   mode: run
   name:

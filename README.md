@@ -11,9 +11,9 @@ For the biochemical sequence design with prepend/append models, please refer to 
 
 We recommend using [uv](https://github.com/astral-sh/uv) to install dependencies and run the project.
 
-First, synchronize the dependencies to set up a virtual environment:
+First, synchronize the dependencies to set up a virtual environment. Specify the CUDA version you want to use, e.g., for CUDA 12, run:
 ```bash
-uv sync
+uv sync --extra cuda12
 ```
 
 This will automatically create a virtual environment (`.venv`) and install all required packages (including JAX and TensorFlow) with matching versions.
