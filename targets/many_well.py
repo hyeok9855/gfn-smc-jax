@@ -132,7 +132,7 @@ class ManyWellEnergy(Target):
                 )
                 x_points = jnp.column_stack([xx.ravel(), yy.ravel()])
                 log_probs = _log_prob_marginal_pair(x_points, i, j + 2)
-                log_probs = jnp.clip(log_probs, -1000, a_max=None).reshape(
+                log_probs = jnp.clip(log_probs, -1000, None).reshape(
                     (grid_width_n_points, grid_width_n_points)
                 )
                 axs[i, j].contour(xx, yy, log_probs, levels=20)
@@ -286,7 +286,7 @@ class ManyWell2(Target):
                 )
                 x_points = jnp.column_stack([xx.ravel(), yy.ravel()])
                 log_probs = _log_prob_marginal_pair(x_points, i, j + 2)
-                log_probs = jnp.clip(log_probs, -1000, a_max=None).reshape(
+                log_probs = jnp.clip(log_probs, -1000, None).reshape(
                     (grid_width_n_points, grid_width_n_points)
                 )
                 axs[i, j].contour(xx, yy, log_probs, levels=20)

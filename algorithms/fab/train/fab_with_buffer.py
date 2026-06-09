@@ -34,7 +34,7 @@ def fab_loss_buffer_samples_fn(
     log_q = log_q_fn_apply(params, x)
     log_w_adjust = (1 - alpha) * (jax.lax.stop_gradient(log_q) - log_q_old)
     chex.assert_equal_shape((log_q, log_w_adjust))
-    w_adjust = jnp.clip(jnp.exp(log_w_adjust), a_max=w_adjust_clip)
+    w_adjust = jnp.clip(jnp.exp(log_w_adjust), max=w_adjust_clip)
     return -jnp.mean(w_adjust * log_q), (log_w_adjust, log_q)
 
 

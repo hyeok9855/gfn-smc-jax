@@ -6,6 +6,8 @@ def print_results(step, logger, config):
             string += f"EUBO {float(logger['KL/eubo'][-1]):.4f}; "
         if "discrepancies/sd" in logger and len(logger["discrepancies/sd"]) > 0:
             string += f"SD {float(logger['discrepancies/sd'][-1]):.4f}; "
+        if "discrepancies/mmd" in logger and len(logger["discrepancies/mmd"]) > 0:
+            string += f"MMD {float(logger['discrepancies/mmd'][-1]):.4f}; "
 
         try:
             string += f"reverse_ESS {float(logger['ESS/reverse'][-1]):.6f}; "
