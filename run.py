@@ -33,7 +33,7 @@ def main(cfg: DictConfig) -> None:
             job_type=f"{cfg.target.name}_{target.dim}D",
             config=flatten_dict(OmegaConf.to_container(cfg, resolve=True, throw_on_missing=True)),
         )
-        wandb.run.log_code(".")
+
     train_fn = get_train_fn(cfg.algorithm.name)
 
     try:
