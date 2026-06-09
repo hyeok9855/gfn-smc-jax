@@ -10,7 +10,7 @@ log_dir: logs/${algorithm.name}_${target.name}_${target.dim}D_${seed}_${now:%Y-%
 #use_jit: False  # Disable jit for better debugging
 use_jit: True
 eval_samples: 2000  # Number of samples used for evaluation
-n_evals: 100  # Number of evaluations during training
+n_evals: 20  # Number of evaluations during training
 moving_average:  # Moving average over subsequent evaluations
   use_ma: True
   window_size: 5
