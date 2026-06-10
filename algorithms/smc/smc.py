@@ -189,10 +189,20 @@ def outer_loop_smc(
     # alg_cfg.common.hmc_num_leapfrog_steps * alg_cfg.common.hmc_steps_per_iter + alg_cfg.common.rwm_steps_per_iter)
     nfe = smc_nfe + mcmc_nfe
 
+    assert (
+        samples.shape[0] >= cfg.eval_samples
+    ), "Number of samples is less than the evaluation samples"
+    if samples.shape[0] > cfg.eval_samples:
+        key, subkey = jax.random.split(key)
+        idx = jax.random.choice(subkey, samples.shape[0], (cfg.eval_samples,), replace=False)
+        eval_samples = samples[idx]
+    else:
+        eval_samples = samples
+
     if cfg.compute_forward_metrics and (target_samples is not None):
 
-        tar_samples = target_samples[: samples.shape[0]]
-        log_weights = -jnp.log(alg_cfg.batch_size) * jnp.ones(alg_cfg.batch_size)
+        tar_samples = target_samples[: cfg.eval_samples]
+        log_weights = -jnp.log(cfg.eval_samples) * jnp.ones(cfg.eval_samples)
 
         neg_fwd_ln_z = 0.0
         neg_eubo = 0.0
@@ -213,7 +223,7 @@ def outer_loop_smc(
         fwd_ln_z = None
         eubo = None
 
-    logger = eval_fn(samples, elbo, ln_z, eubo, fwd_ln_z)
+    logger = eval_fn(eval_samples, elbo, ln_z, eubo, fwd_ln_z)
 
     logger["stats/wallclock"] = [delta_time]
     logger["stats/nfe"] = [nfe]

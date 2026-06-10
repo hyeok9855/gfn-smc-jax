@@ -48,7 +48,12 @@ For CMCD and SCLD baselines, please refer to the [repository of SCLD](https://gi
   - `student_t_mixture_50d`
   - `many_well_64d`
 
-Please refer to our paper for more details on the algorithms and targets.
+To change the configs, you can either edit the files in the `configs` directory or override them using the command line. For example, to use LV (instead of TB) loss without the buffer:
+```bash
+uv run python run.py algorithm=gfn_tb target=gaussian_mixture40 algorithm.loss_type=lv algorithm.use_buffer=false
+```
+
+Please refer to our paper for more details on the algorithms and targets. There are some additional features that are not included in the paper, e.g., Pinned Brownian motion (instead of OU) as the reference process, and MALA as a rejuvenation step in SMC for `gfn_subtb_smc`.
 
 ## Citation
 
